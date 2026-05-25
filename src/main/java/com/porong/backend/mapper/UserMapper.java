@@ -3,7 +3,9 @@ package com.porong.backend.mapper;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Options;
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import com.porong.backend.vo.UserVO;
 
@@ -40,4 +42,8 @@ public interface UserMapper {
     // ID로 유저 조회
     @Select("SELECT * FROM users WHERE id = #{id}")
     UserVO findById(Long id);
+    
+    // 닉네임 수정
+    @Update("UPDATE users SET nickname = #{nickname} WHERE id = #{id}")
+    int updateNickname(@Param("id") Long id, @Param("nickname") String nickname);
 }

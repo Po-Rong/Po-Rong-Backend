@@ -121,4 +121,37 @@ public class UserService {
 
 	    return ResponseEntity.ok(response);
 	}
+	
+	public ResponseEntity<?> updateNickname(Long id, String nickname) {
+
+	    // 1. 유저 존재 여부 체크
+	    UserVO user = userMapper.findById(id);
+	    if (user == null) {
+	        return ResponseEntity.status(404)
+	            .body(Map.of("message", "존재하지 않는 회원입니다."));
+	    }
+
+	    // 2. 닉네임 중복 체크
+	    if (userMapper.existsByNickname(nickname) > 0) {
+	        return ResponseEntity.status(409)
+	            .body(Map.of("message", "이미 사용중인 닉네임입니다."));
+	    }
+
+	    // 3. 닉네임 수정
+	    userMapper.updateNickname(id, nickname);
+
+	    // 4. 수정된 유저 정보 반환
+	    UserVO updatedUser = userMapper.findById(id);
+	    int wishlistCount = userMapper.countWishlist(updatedUser.getId());
+	    int reviewCount = userMapper.countReview(updatedUser.getId());
+
+	    UserResponseDto response = new UserResponseDto();
+	    response.setId(updatedUser.getId());
+	    response.setEmail(updatedUser.getEmail());
+	    response.setNickname(updatedUser.getNickname());
+	    response.setRole(updatedUser.getRole());
+	    response.setWishlistCount(wishlistCount);
+	    response.setReviewCount(reviewCount);
+	    return ResponseEntity.ok(response);
+	}
 }
