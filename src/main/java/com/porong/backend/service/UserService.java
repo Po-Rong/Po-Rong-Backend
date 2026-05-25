@@ -6,7 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import com.porong.backend.dto.request.LoginRequestDto;
 import com.porong.backend.dto.request.RegisterRequestDto;
+import com.porong.backend.dto.response.UserResponseDto;
 import com.porong.backend.mapper.UserMapper;
 import com.porong.backend.vo.UserVO;
 
@@ -48,4 +50,38 @@ public class UserService {
         return ResponseEntity.status(201)
                 .body(Map.of("message", "회원가입이 완료되었습니다."));
 	}
+
+	public ResponseEntity<?> login(LoginRequestDto dto) {
+
+	    // 1. 이메일로 유저 조회
+	    UserVO user = userMapper.findByEmail(dto.getEmail());
+
+	    // 2. 이메일 존재 여부 체크
+	    if (user == null) {
+	        return ResponseEntity.status(401)
+	            .body(Map.of("message", "이메일 또는 비밀번호가 일치하지 않습니다."));
+	    }
+
+	    // 3. 비밀번호 체크
+	    if (!user.getPassword().equals(dto.getPassword())) {
+	        return ResponseEntity.status(401)
+	            .body(Map.of("message", "이메일 또는 비밀번호가 일치하지 않습니다."));
+	    }
+	    
+	    // 4. 찜 수, 리뷰 수 조회
+	    int wishlistCount = userMapper.countWishlist(user.getId());
+	    int reviewCount = userMapper.countReview(user.getId());
+
+	    // 5. Response 반환
+	    UserResponseDto response = new UserResponseDto();
+	    response.setId(user.getId());
+	    response.setEmail(user.getEmail());
+	    response.setNickname(user.getNickname());
+	    response.setRole(user.getRole());
+	    response.setWishlistCount(wishlistCount);
+	    response.setReviewCount(reviewCount);
+
+	    return ResponseEntity.ok(response);
+	}
+	
 }

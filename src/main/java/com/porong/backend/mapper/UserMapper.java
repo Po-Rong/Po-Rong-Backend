@@ -24,4 +24,16 @@ public interface UserMapper {
     // 닉네임 중복 체크
     @Select("SELECT COUNT(*) FROM users WHERE nickname = #{nickname}")
     int existsByNickname(String nickname);
+    
+    // 이메일로 유저 조회
+    @Select("SELECT * FROM users WHERE email = #{email}")
+    UserVO findByEmail(String email);
+    
+    // 찜 수 조회
+    @Select("SELECT COUNT(*) FROM wishlists WHERE user_id = #{userId}")
+    int countWishlist(Long userId);
+
+    // 리뷰 수 조회
+    @Select("SELECT COUNT(*) FROM reviews WHERE user_id = #{userId}")
+    int countReview(Long userId);
 }
