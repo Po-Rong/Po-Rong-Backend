@@ -5,6 +5,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -41,5 +42,11 @@ public class UserController {
 	    @PathVariable("id") Long id,
 	    @RequestBody Map<String, String> body) {
 	    return userService.updateNickname(id, body.get("nickname"));
+	}
+	
+	// 회원 탈퇴
+	@DeleteMapping("/{id}")
+	public ResponseEntity<?> deleteUser(@PathVariable("id") Long id) {
+	    return userService.deleteUser(id);
 	}
 }

@@ -154,4 +154,19 @@ public class UserService {
 	    response.setReviewCount(reviewCount);
 	    return ResponseEntity.ok(response);
 	}
+	
+	public ResponseEntity<?> deleteUser(Long id) {
+
+	    // 1. 유저 존재 여부 체크
+	    UserVO user = userMapper.findById(id);
+	    if (user == null) {
+	        return ResponseEntity.status(404)
+	            .body(Map.of("message", "존재하지 않는 회원입니다."));
+	    }
+
+	    // 2. 회원 탈퇴
+	    userMapper.deleteUser(id);
+
+	    return ResponseEntity.ok(Map.of("message", "회원 탈퇴가 완료되었습니다."));
+	}
 }

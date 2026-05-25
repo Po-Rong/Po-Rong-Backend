@@ -1,5 +1,6 @@
 package com.porong.backend.mapper;
 
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Options;
@@ -46,4 +47,8 @@ public interface UserMapper {
     // 닉네임 수정
     @Update("UPDATE users SET nickname = #{nickname} WHERE id = #{id}")
     int updateNickname(@Param("id") Long id, @Param("nickname") String nickname);
+    
+    // 회원 탈퇴
+    @Delete("DELETE FROM users WHERE id = #{id}")
+    int deleteUser(Long id);
 }
