@@ -84,4 +84,14 @@ public class UserService {
 	    return ResponseEntity.ok(response);
 	}
 	
+	public ResponseEntity<?> checkNickname(String nickname) {
+
+	    if (userMapper.existsByNickname(nickname) > 0) {
+	        return ResponseEntity.status(409)
+	            .body(Map.of("message", "이미 사용중인 닉네임입니다."));
+	    }
+
+	    return ResponseEntity.ok(Map.of("message", "사용 가능한 닉네임입니다."));
+	}
+	
 }
