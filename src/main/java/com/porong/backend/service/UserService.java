@@ -94,4 +94,31 @@ public class UserService {
 	    return ResponseEntity.ok(Map.of("message", "사용 가능한 닉네임입니다."));
 	}
 	
+	
+	public ResponseEntity<?> getUser(Long id) {
+
+	    // 1. 유저 조회
+	    UserVO user = userMapper.findById(id);
+
+	    // 2. 유저 존재 여부 체크
+	    if (user == null) {
+	        return ResponseEntity.status(404)
+	            .body(Map.of("message", "존재하지 않는 회원입니다."));
+	    }
+
+	    // 3. 찜 수, 리뷰 수 조회
+	    int wishlistCount = userMapper.countWishlist(user.getId());
+	    int reviewCount = userMapper.countReview(user.getId());
+
+	    // 4. Response 반환
+	    UserResponseDto response = new UserResponseDto();
+	    response.setId(user.getId());
+	    response.setEmail(user.getEmail());
+	    response.setNickname(user.getNickname());
+	    response.setRole(user.getRole());
+	    response.setWishlistCount(wishlistCount);
+	    response.setReviewCount(reviewCount);
+
+	    return ResponseEntity.ok(response);
+	}
 }

@@ -36,4 +36,8 @@ public interface UserMapper {
     // 리뷰 수 조회
     @Select("SELECT COUNT(*) FROM reviews WHERE user_id = #{userId}")
     int countReview(Long userId);
+    
+    // ID로 유저 조회
+    @Select("SELECT * FROM users WHERE id = #{id}")
+    UserVO findById(Long id);
 }
