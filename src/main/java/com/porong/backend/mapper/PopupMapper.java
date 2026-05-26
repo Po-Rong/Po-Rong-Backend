@@ -1,9 +1,12 @@
 package com.porong.backend.mapper;
 
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Options;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import com.porong.backend.vo.PopupVO;
 
@@ -30,5 +33,25 @@ public interface PopupMapper {
     // 태그 등록
     @Insert("INSERT INTO popup_tags (popup_id, tag) VALUES (#{popupId}, #{tag})")
     int insertTag(@Param("popupId") Long popupId, @Param("tag") String tag);
+    
+    // 팝업 수정
+    @Update("UPDATE popups SET title=#{title}, category_id=#{categoryId}, region_id=#{regionId}, " +
+            "address=#{address}, start_date=#{startDate}, end_date=#{endDate}, " +
+            "reservation_start_date=#{reservationStartDate}, reservation_end_date=#{reservationEndDate}, " +
+            "notice=#{notice}, benefit=#{benefit}, info=#{info}, sns_url=#{snsUrl}, " +
+            "main_image_url=#{mainImageUrl} WHERE id=#{id}")
+    int update(PopupVO popup);
+
+    // 팝업 ID로 조회
+    @Select("SELECT * FROM popups WHERE id = #{id}")
+    PopupVO findById(Long id);
+
+    // 상세 이미지 삭제 (수정 시 기존 이미지 삭제 후 재등록)
+    @Delete("DELETE FROM popup_images WHERE popup_id = #{popupId}")
+    int deleteImages(Long popupId);
+
+    // 태그 삭제 (수정 시 기존 태그 삭제 후 재등록)
+    @Delete("DELETE FROM popup_tags WHERE popup_id = #{popupId}")
+    int deleteTags(Long popupId);
 
 }
