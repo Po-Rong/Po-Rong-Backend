@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.porong.backend.dto.request.ReviewRequestDto;
 import com.porong.backend.dto.response.ReviewCreateResponseDto;
 import com.porong.backend.dto.response.ReviewListResponseDto;
+import com.porong.backend.mapper.ReservationMapper;
 import com.porong.backend.mapper.ReviewMapper;
 import com.porong.backend.vo.ReviewVO;
 
@@ -19,6 +20,9 @@ public class ReviewService {
 	
 	@Autowired
     private ReviewMapper reviewMapper;
+	
+    @Autowired
+    private ReservationMapper reservationMapper;
 
     // 팝업별 리뷰 목록 조회 (예약 방문 시간 포함)
     @Transactional(readOnly = true)
@@ -129,6 +133,39 @@ public class ReviewService {
         reviewMapper.deleteReview(reviewId);
 
         return ResponseEntity.ok(Map.of("success", true, "message", "리뷰가 정상적으로 삭제되었습니다."));
+    }
+    
+    // 판매자용 - 팝업 리뷰 목록 조회
+    public ResponseEntity<?> getReviewsByPopup(Long popupId, Long sellerId) {
+
+        // 1. seller 여부 체크
+        String role = reservationMapper.findRoleById(sellerId);
+        if (role == null || !role.equals("seller")) {
+            return ResponseEntity.status(403)
+                .body(Map.of("message", "판매자만 조회할 수 있습니다."));
+        }
+
+        List<ReviewVO> reviews;
+
+        if (popupId != null) {
+            // 2. 본인 팝업 여부 체크
+            Long ownerId = reservationMapper.findOwnerByPopupId(popupId);
+            if (ownerId == null) {
+                return ResponseEntity.status(404)
+                    .body(Map.of("message", "존재하지 않는 팝업입니다."));
+            }
+            if (!ownerId.equals(sellerId)) {
+                return ResponseEntity.status(403)
+                    .body(Map.of("message", "본인이 등록한 팝업만 조회할 수 있습니다."));
+            }
+            // 3. 특정 팝업 리뷰 조회
+            reviews = reviewMapper.findByPopupId(popupId);
+        } else {
+            // 3. 판매자 전체 팝업 리뷰 조회
+            reviews = reviewMapper.findAllBySellerId(sellerId);
+        }
+
+        return ResponseEntity.ok(reviews);
     }
 
 }

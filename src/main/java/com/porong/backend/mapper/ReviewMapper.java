@@ -92,4 +92,14 @@ public interface ReviewMapper {
     		WHERE user_id = #{userId} AND popup_id = #{popupId}
     		""")
         int deleteCollectionBook(@Param("userId") Long userId, @Param("popupId") Long popupId);
+    
+    // 판매자 특정 팝업 리뷰 조회
+    @Select("SELECT * FROM reviews WHERE popup_id = #{popupId}")
+    List<ReviewVO> findByPopupId(Long popupId);
+
+    // 판매자 전체 팝업 리뷰 조회
+    @Select("SELECT r.* FROM reviews r " +
+            "JOIN popups p ON r.popup_id = p.id " +
+            "WHERE p.user_id = #{sellerId}")
+    List<ReviewVO> findAllBySellerId(Long sellerId);
 }
