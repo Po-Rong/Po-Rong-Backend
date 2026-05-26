@@ -123,4 +123,10 @@ public class PopupController {
         @RequestParam(value = "user_id", required = false) Long userId) {
         return popupService.getPopupList(sellerId, regionId, categoryId, status, sort, keyword, userId);
     }
+    
+    // 팝업 상세 조회
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getPopupDetail(@PathVariable("id") Long id) {
+        return popupService.getPopupDetail(id);
+    }
 }

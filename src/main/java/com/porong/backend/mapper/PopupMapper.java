@@ -68,5 +68,31 @@ public interface PopupMapper {
     
     @SelectProvider(type = PopupSqlProvider.class, method = "getPopupList")
     List<Map<String, Object>> getPopupList(Map<String, Object> params);
+    
+    // 팝업 상세 조회
+    @Select("SELECT p.id, p.title, p.address, p.main_image_url, p.notice, p.benefit, " +
+            "p.info, p.sns_url, p.latitude, p.longitude, p.start_date, p.end_date, " +
+            "p.reservation_start_date, p.reservation_end_date, p.created_at, " +
+            "c.category_name, r.region_name, " +
+            "CASE WHEN NOW() < p.start_date THEN 'upcoming' " +
+            "     WHEN NOW() > p.end_date THEN 'closed' " +
+            "     ELSE 'ongoing' END AS status, " +
+            "ROUND(COALESCE(AVG(rv.rating), 0), 1) AS avg_rating, " +
+            "COUNT(rv.id) AS review_count " +
+            "FROM popups p " +
+            "LEFT JOIN categories c ON p.category_id = c.id " +
+            "LEFT JOIN regions r ON p.region_id = r.id " +
+            "LEFT JOIN reviews rv ON p.id = rv.popup_id " +
+            "WHERE p.id = #{id} " +
+            "GROUP BY p.id")
+    Map<String, Object> findDetailById(Long id);
+
+    // 상세 이미지 조회
+    @Select("SELECT detail_image_url FROM popup_images WHERE popup_id = #{popupId} ORDER BY image_order")
+    List<String> findImagesByPopupId(Long popupId);
+
+    // 태그 조회
+    @Select("SELECT tag FROM popup_tags WHERE popup_id = #{popupId}")
+    List<String> findTagsByPopupId(Long popupId);
 
 }

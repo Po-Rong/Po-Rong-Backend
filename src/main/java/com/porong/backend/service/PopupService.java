@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.porong.backend.dto.request.PopupRequestDto;
+import com.porong.backend.dto.response.PopupDetailResponseDto;
 import com.porong.backend.dto.response.PopupListResponseDto;
 import com.porong.backend.mapper.PopupMapper;
 import com.porong.backend.vo.PopupVO;
@@ -257,5 +258,50 @@ public class PopupService {
         }).collect(Collectors.toList());
 
         return ResponseEntity.ok(result);
+    }
+    
+    public ResponseEntity<?> getPopupDetail(Long id) {
+
+        // 1. 팝업 조회
+        Map<String, Object> popup = popupMapper.findDetailById(id);
+
+        // 2. 팝업 존재 여부 체크
+        if (popup == null) {
+            return ResponseEntity.status(404)
+                .body(Map.of("message", "존재하지 않는 팝업입니다."));
+        }
+
+        // 3. 상세 이미지 조회
+        List<String> detailImages = popupMapper.findImagesByPopupId(id);
+
+        // 4. 태그 조회
+        List<String> tags = popupMapper.findTagsByPopupId(id);
+
+        // 5. DTO에 담기
+        PopupDetailResponseDto dto = new PopupDetailResponseDto();
+        dto.setId(((Number) popup.get("id")).longValue());
+        dto.setStatus((String) popup.get("status"));
+        dto.setTitle((String) popup.get("title"));
+        dto.setCategoryName((String) popup.get("category_name"));
+        dto.setRegionName((String) popup.get("region_name"));
+        dto.setAddress((String) popup.get("address"));
+        dto.setMainImageUrl((String) popup.get("main_image_url"));
+        dto.setDetailImages(detailImages);
+        dto.setTags(tags);
+        dto.setNotice((String) popup.get("notice"));
+        dto.setBenefit((String) popup.get("benefit"));
+        dto.setInfo((String) popup.get("info"));
+        dto.setSnsUrl((String) popup.get("sns_url"));
+        dto.setLatitude(popup.get("latitude") != null ? ((Number) popup.get("latitude")).doubleValue() : null);
+        dto.setLongitude(popup.get("longitude") != null ? ((Number) popup.get("longitude")).doubleValue() : null);
+        dto.setStartDate(popup.get("start_date").toString());
+        dto.setEndDate(popup.get("end_date").toString());
+        dto.setReservationStartDate(popup.get("reservation_start_date") != null ? popup.get("reservation_start_date").toString() : null);
+        dto.setReservationEndDate(popup.get("reservation_end_date") != null ? popup.get("reservation_end_date").toString() : null);
+        dto.setAvgRating(popup.get("avg_rating") != null ? ((Number) popup.get("avg_rating")).doubleValue() : null);
+        dto.setReviewCount(((Number) popup.get("review_count")).intValue());
+        dto.setCreatedAt(popup.get("created_at").toString());
+
+        return ResponseEntity.ok(dto);
     }
 }
