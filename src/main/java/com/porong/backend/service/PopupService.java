@@ -2,9 +2,11 @@ package com.porong.backend.service;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.porong.backend.dto.request.PopupRequestDto;
+import com.porong.backend.dto.response.PopupListResponseDto;
 import com.porong.backend.mapper.PopupMapper;
 import com.porong.backend.vo.PopupVO;
 
@@ -222,5 +225,37 @@ public class PopupService {
         popupMapper.delete(id);
 
         return ResponseEntity.ok(Map.of("message", "팝업이 삭제되었습니다."));
+    }
+    
+    public ResponseEntity<?> getPopupList(Long sellerId, Long regionId, Long categoryId,
+            String status, String sort, String keyword, Long userId) {
+
+        Map<String, Object> params = new HashMap<>();
+        if (sellerId != null) params.put("sellerId", sellerId);
+        if (regionId != null) params.put("regionId", regionId);
+        if (categoryId != null) params.put("categoryId", categoryId);
+        if (status != null) params.put("status", status);
+        if (sort != null) params.put("sort", sort);
+        if (keyword != null) params.put("keyword", keyword);
+        if (userId != null) params.put("userId", userId);
+
+        List<Map<String, Object>> popups = popupMapper.getPopupList(params);
+
+        List<PopupListResponseDto> result = popups.stream().map(popup -> {
+            PopupListResponseDto dto = new PopupListResponseDto();
+            dto.setId(((Number) popup.get("id")).longValue());
+            dto.setStatus((String) popup.get("status"));
+            dto.setTitle((String) popup.get("title"));
+            dto.setCategoryName((String) popup.get("category_name"));
+            dto.setRegionName((String) popup.get("region_name"));
+            dto.setMainImageUrl((String) popup.get("main_image_url"));
+            dto.setStartDate(popup.get("start_date").toString());
+            dto.setEndDate(popup.get("end_date").toString());
+            dto.setAvgRating(((Number) popup.get("avg_rating")).doubleValue());
+            dto.setIsWishlisted(((Number) popup.get("is_wishlisted")).intValue() == 1);
+            return dto;
+        }).collect(Collectors.toList());
+
+        return ResponseEntity.ok(result);
     }
 }

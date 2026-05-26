@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -108,5 +109,18 @@ public class PopupController {
         @PathVariable("id") Long id,
         @RequestParam("seller_id") Long sellerId) {
         return popupService.deletePopup(id, sellerId);
+    }
+    
+    // 팝업 목록 조회
+    @GetMapping
+    public ResponseEntity<?> getPopupList(
+        @RequestParam(value = "seller_id", required = false) Long sellerId,
+        @RequestParam(value = "region_id", required = false) Long regionId,
+        @RequestParam(value = "category_id", required = false) Long categoryId,
+        @RequestParam(value = "status", required = false) String status,
+        @RequestParam(value = "sort", required = false) String sort,
+        @RequestParam(value = "keyword", required = false) String keyword,
+        @RequestParam(value = "user_id", required = false) Long userId) {
+        return popupService.getPopupList(sellerId, regionId, categoryId, status, sort, keyword, userId);
     }
 }
