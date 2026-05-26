@@ -24,6 +24,9 @@ public class PopupService {
 	
 	@Autowired
     private PopupMapper popupMapper;
+	
+	@Autowired
+	private KakaoApiService kakaoApiService;
 
     public ResponseEntity<?> createPopup(PopupRequestDto dto, MultipartFile mainImage,
                                           List<MultipartFile> detailImages, List<String> tags) {
@@ -73,6 +76,13 @@ public class PopupService {
         popup.setInfo(dto.getInfo());
         popup.setSnsUrl(dto.getSnsUrl());
         popup.setMainImageUrl(mainImageUrl);
+        
+        // 위도/경도 변환 추가
+        double[] coordinates = kakaoApiService.getCoordinates(dto.getAddress());
+        if (coordinates != null) {
+            popup.setLatitude(coordinates[0]);
+            popup.setLongitude(coordinates[1]);
+        }
 
         // 7. 팝업 DB 저장
         popupMapper.insert(popup);
@@ -176,6 +186,13 @@ public class PopupService {
 		popup.setInfo(dto.getInfo());
 		popup.setSnsUrl(dto.getSnsUrl());
 		popup.setMainImageUrl(mainImageUrl);
+		
+		// 위도/경도 변환 추가
+		double[] coordinates = kakaoApiService.getCoordinates(dto.getAddress());
+		if (coordinates != null) {
+		    popup.setLatitude(coordinates[0]);
+		    popup.setLongitude(coordinates[1]);
+		}
 		
 		// 8. 팝업 수정
 		popupMapper.update(popup);

@@ -18,12 +18,12 @@ import com.porong.backend.vo.PopupVO;
 public interface PopupMapper {
 	
     // 팝업 등록
-    @Insert("INSERT INTO popups (user_id, title, category_id, region_id, address, " +
-            "start_date, end_date, reservation_start_date, reservation_end_date, " +
-            "notice, benefit, info, sns_url, main_image_url, created_at) " +
-            "VALUES (#{userId}, #{title}, #{categoryId}, #{regionId}, #{address}, " +
-            "#{startDate}, #{endDate}, #{reservationStartDate}, #{reservationEndDate}, " +
-            "#{notice}, #{benefit}, #{info}, #{snsUrl}, #{mainImageUrl}, NOW())")
+	@Insert("INSERT INTO popups (user_id, title, category_id, region_id, address, " +
+	        "start_date, end_date, reservation_start_date, reservation_end_date, " +
+	        "notice, benefit, info, sns_url, main_image_url, latitude, longitude, created_at) " +
+	        "VALUES (#{userId}, #{title}, #{categoryId}, #{regionId}, #{address}, " +
+	        "#{startDate}, #{endDate}, #{reservationStartDate}, #{reservationEndDate}, " +
+	        "#{notice}, #{benefit}, #{info}, #{snsUrl}, #{mainImageUrl}, #{latitude}, #{longitude}, NOW())")
     @Options(useGeneratedKeys = true, keyProperty = "id")
     int insert(PopupVO popup);
 
@@ -43,7 +43,7 @@ public interface PopupMapper {
             "address=#{address}, start_date=#{startDate}, end_date=#{endDate}, " +
             "reservation_start_date=#{reservationStartDate}, reservation_end_date=#{reservationEndDate}, " +
             "notice=#{notice}, benefit=#{benefit}, info=#{info}, sns_url=#{snsUrl}, " +
-            "main_image_url=#{mainImageUrl} WHERE id=#{id}")
+            "main_image_url=#{mainImageUrl}, latitude=#{latitude}, longitude=#{longitude} WHERE id=#{id}")
     int update(PopupVO popup);
 
     // 팝업 ID로 조회
