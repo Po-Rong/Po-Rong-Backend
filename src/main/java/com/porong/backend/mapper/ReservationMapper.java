@@ -21,9 +21,17 @@ public interface ReservationMapper {
             "VALUES (#{popupId}, #{req.userId}, #{req.reserveDate}, #{req.userName}, #{req.userPhone}, 'CONFIRMED', NOW())")
     int insertReservation(@Param("popupId") Long popupId, @Param("req") ReservationCreateRequestDto request);
 
-    // 2. 내 예약 내역 조회 (팝업 테이블과 JOIN)
-    @Select("SELECT r.id, r.popup_id AS popupId, p.title AS popupTitle, p.main_image_url AS mainImageUrl, " +
-            "r.reserve_date AS reserveDate, r.status, r.user_name AS userName, r.user_phone AS userPhone, r.created_at AS createdAt " +
+    // 2. 내 예약 내역 조회
+    @Select("SELECT r.id, " +
+            "       r.user_id AS userId, " + 
+            "       r.popup_id AS popupId, " +
+            "       p.title AS popupTitle, " +
+            "       p.main_image_url AS mainImageUrl, " +
+            "       r.reserve_date AS reserveDate, " +
+            "       r.status, " +
+            "       r.user_name AS userName, " +
+            "       r.user_phone AS userPhone, " +
+            "       r.created_at AS createdAt " +
             "FROM reservations r " +
             "JOIN popups p ON r.popup_id = p.id " +
             "WHERE r.user_id = #{userId} " +
