@@ -9,10 +9,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class WishlistToggleResponseDto {
-	
+public class ReviewCreateResponseDto {
 	private boolean success;
     private String message;
-    
-    private Boolean isWished; // 찜 등록되면 true, 해제되면 false
+    private Long reviewId;
+    private Long earnedKeyringId; // 지급된 키링 ID
 }

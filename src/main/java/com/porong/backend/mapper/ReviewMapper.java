@@ -1,0 +1,95 @@
+package com.porong.backend.mapper;
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Delete;
+import org.apache.ibatis.annotations.Insert;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Options;
+import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
+
+import com.porong.backend.dto.response.ReviewListResponseDto;
+import com.porong.backend.vo.ReviewVO;
+
+@Mapper
+public interface ReviewMapper {
+	// 특정 팝업의 리뷰 목록 전체 조회
+	@Select("""
+	        <script>
+	        SELECT 
+	            r.id AS reviewId,
+	            r.user_id AS userId,
+	            u.nickname,
+	            DATE_FORMAT(res.reserve_date, '%Y-%m-%d') AS reserveDate,
+	            CASE 
+	                WHEN DATE_FORMAT(res.reserve_date, '%H') &lt; 12 THEN DATE_FORMAT(res.reserve_date, '오전 %h시')
+	                ELSE DATE_FORMAT(res.reserve_date, '오후 %h시')
+	            END AS reserveTime,
+	            r.congestion_level,
+	            r.content,
+	            r.review_image_url,
+	            r.rating
+	        FROM reviews r
+	        INNER JOIN users u ON r.user_id = u.id
+	        LEFT JOIN reservations res ON r.user_id = res.user_id AND r.popup_id = res.popup_id
+	        WHERE r.popup_id = #{popupId}
+	        <choose>
+	            <when test="sort == 'rating_high'">
+	                ORDER BY r.rating DESC, r.created_at DESC
+	            </when>
+	            <when test="sort == 'rating_low'">
+	                ORDER BY r.rating ASC, r.created_at DESC
+	            </when>
+	            <otherwise>
+	                ORDER BY r.created_at DESC
+	            </otherwise>
+	        </choose>
+	        </script>
+	    """)
+	    List<ReviewListResponseDto> selectReviewsByPopupId(@Param("popupId") Long popupId, @Param("sort") String sort);
+
+    // 리뷰 단건 조회
+	@Select("SELECT id, content, rating, congestion_level, review_image_url, popup_id, user_id, created_at "
+		      + "FROM reviews WHERE id = #{id}")
+	ReviewVO findById(Long id);
+
+    // 리뷰 등록
+    @Insert("INSERT INTO reviews (content, rating, congestion_level, review_image_url, popup_id, user_id) "
+          + "VALUES (#{content}, #{rating}, #{congestionLevel}, #{reviewImageUrl}, #{popupId}, #{userId})")
+    @Options(useGeneratedKeys = true, keyProperty = "id")
+    int insertReview(ReviewVO review);
+
+    // 리뷰 수정
+    @Update("UPDATE reviews SET content = #{content}, rating = #{rating}, "
+          + "congestion_level = #{congestionLevel}, review_image_url = #{reviewImageUrl} "
+          + "WHERE id = #{id}")
+    int updateReview(ReviewVO review);
+
+    // 리뷰 삭제
+    @Delete("DELETE FROM reviews WHERE id = #{id}")
+    int deleteReview(Long id);
+
+    // 유저가 여태까지 작성한 총 리뷰 개수 구하기
+    @Select("SELECT COUNT(*) FROM reviews WHERE user_id = #{userId}")
+    int countReviewsByUserId(Long userId);
+
+    // 리뷰 개수 조건(1~5)에 딱 맞는 캐릭터 키링 ID 및 이름 조회하기
+    @Select("SELECT id, name FROM keyrings WHERE review_count = #{reviewCount} LIMIT 1")
+    java.util.Map<String, Object> findKeyringByReviewCount(int reviewCount);
+
+    // 유저 도감(collection_books)에 획득한 키링 추가하기
+    @Insert("""
+            INSERT INTO collection_books (user_id, keyring_id, popup_id) 
+            VALUES (#{userId}, #{keyringId}, #{popupId})
+        """)
+        int insertCollectionBook(@Param("userId") Long userId, @Param("keyringId") Long keyringId, @Param("popupId") Long popupId);
+
+    // 리뷰 삭제 시 연동된 유저 도감 키링 회수 (삭제)
+    @Delete("""
+    		DELETE FROM collection_books 
+    		WHERE user_id = #{userId} AND popup_id = #{popupId}
+    		""")
+        int deleteCollectionBook(@Param("userId") Long userId, @Param("popupId") Long popupId);
+}
