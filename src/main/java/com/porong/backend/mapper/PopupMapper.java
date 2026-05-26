@@ -53,5 +53,13 @@ public interface PopupMapper {
     // 태그 삭제 (수정 시 기존 태그 삭제 후 재등록)
     @Delete("DELETE FROM popup_tags WHERE popup_id = #{popupId}")
     int deleteTags(Long popupId);
+    
+    // 팝업 삭제
+    @Delete("DELETE FROM popups WHERE id = #{id}")
+    int delete(Long id);
+
+    // 예약자 존재 여부 체크
+    @Select("SELECT COUNT(*) FROM reservations WHERE popup_id = #{popupId} AND status = 'CONFIRMED'")
+    int countConfirmedReservations(Long popupId);
 
 }

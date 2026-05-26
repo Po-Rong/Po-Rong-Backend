@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -101,4 +102,11 @@ public class PopupController {
         return popupService.updatePopup(id, dto, mainImage, detailImages, tags);
     }
     
+    // 팝업 삭제
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deletePopup(
+        @PathVariable("id") Long id,
+        @RequestParam("seller_id") Long sellerId) {
+        return popupService.deletePopup(id, sellerId);
+    }
 }

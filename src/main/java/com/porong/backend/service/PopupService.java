@@ -195,4 +195,32 @@ public class PopupService {
 		
 		return ResponseEntity.ok(Map.of("id", id, "message", "팝업이 수정되었습니다."));
 		}
+    
+    
+    public ResponseEntity<?> deletePopup(Long id, Long sellerId) {
+
+        // 1. 팝업 존재 여부 체크
+        PopupVO popup = popupMapper.findById(id);
+        if (popup == null) {
+            return ResponseEntity.status(404)
+                .body(Map.of("message", "존재하지 않는 팝업입니다."));
+        }
+
+        // 2. 판매자 권한 체크
+        if (!popup.getUserId().equals(sellerId)) {
+            return ResponseEntity.status(403)
+                .body(Map.of("message", "본인이 등록한 팝업만 삭제할 수 있습니다."));
+        }
+
+        // 3. 예약자 존재 여부 체크
+        if (popupMapper.countConfirmedReservations(id) > 0) {
+            return ResponseEntity.status(409)
+                .body(Map.of("message", "예약자가 존재하는 팝업은 삭제할 수 없습니다."));
+        }
+
+        // 4. 팝업 삭제
+        popupMapper.delete(id);
+
+        return ResponseEntity.ok(Map.of("message", "팝업이 삭제되었습니다."));
+    }
 }
