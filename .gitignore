@@ -35,3 +35,9 @@ out/
 
 ### VS Code ###
 .vscode/
+
+# Image upload folder
+uploads/
+
+# Sensitive configuration file (DB credentials, etc.)
+src/main/resources/application.properties
