@@ -1,11 +1,17 @@
 package com.porong.backend.mapper;
 
+import java.util.List;
+
+import org.apache.ibatis.annotations.Insert;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
+
 import com.porong.backend.dto.request.ReservationCreateRequestDto;
 import com.porong.backend.dto.request.ReservationUpdateRequestDto;
 import com.porong.backend.dto.response.ReservationResponseDto;
-import org.apache.ibatis.annotations.*;
-
-import java.util.List;
+import com.porong.backend.vo.ReservationVO;
 
 @Mapper
 public interface ReservationMapper {
@@ -36,4 +42,16 @@ public interface ReservationMapper {
     @Update("UPDATE reservations SET reserve_date = #{req.reserveDate}, user_name = #{req.userName}, user_phone = #{req.userPhone} " +
             "WHERE id = #{reservationId}")
     int updateReservation(@Param("reservationId") Long reservationId, @Param("req") ReservationUpdateRequestDto request);
+    
+    // 판매자용 - 팝업 예약자 목록 조회
+    @Select("SELECT * FROM reservations WHERE popup_id = #{popupId}")
+    List<ReservationVO> findByPopupId(Long popupId);
+
+    // 판매자 여부 체크
+    @Select("SELECT role FROM users WHERE id = #{userId}")
+    String findRoleById(Long userId);
+
+    // 팝업 소유자 체크
+    @Select("SELECT user_id FROM popups WHERE id = #{popupId}")
+    Long findOwnerByPopupId(Long popupId);
 }

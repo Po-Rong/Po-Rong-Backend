@@ -1,7 +1,9 @@
 package com.porong.backend.service;
 
 import java.util.List;
+import java.util.Map;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -10,6 +12,7 @@ import com.porong.backend.dto.request.ReservationCreateRequestDto;
 import com.porong.backend.dto.request.ReservationUpdateRequestDto;
 import com.porong.backend.dto.response.ReservationResponseDto;
 import com.porong.backend.mapper.ReservationMapper;
+import com.porong.backend.vo.ReservationVO;
 
 import lombok.RequiredArgsConstructor;
 
@@ -66,5 +69,32 @@ public class ReservationService {
         
         reservationMapper.updateReservation(reservationId, request);
         return "SUCCESS";
+    }
+    
+    // 5. 판매자용 - 팝업 예약자 목록 조회
+    public ResponseEntity<?> getReservationsByPopup(Long popupId, Long sellerId) {
+
+        // 1. seller 여부 체크
+        String role = reservationMapper.findRoleById(sellerId);
+        if (role == null || !role.equals("seller")) {
+            return ResponseEntity.status(403)
+                .body(Map.of("message", "판매자만 조회할 수 있습니다."));
+        }
+
+        // 2. 본인 팝업 여부 체크
+        Long ownerId = reservationMapper.findOwnerByPopupId(popupId);
+        if (ownerId == null) {
+            return ResponseEntity.status(404)
+                .body(Map.of("message", "존재하지 않는 팝업입니다."));
+        }
+        if (!ownerId.equals(sellerId)) {
+            return ResponseEntity.status(403)
+                .body(Map.of("message", "본인이 등록한 팝업만 조회할 수 있습니다."));
+        }
+
+        // 3. 예약자 목록 조회
+        List<ReservationVO> reservations = reservationMapper.findByPopupId(popupId);
+
+        return ResponseEntity.ok(reservations);
     }
 }
