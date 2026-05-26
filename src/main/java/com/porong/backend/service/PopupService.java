@@ -154,16 +154,20 @@ public class PopupService {
 		dto.setReservationEndDate(dto.getEndDate());
 		}
 		
-		// 4. 날짜 역전 체크
-		if (dto.getEndDate().compareTo(dto.getStartDate()) < 0) {
-		return ResponseEntity.status(400)
-		.body(Map.of("message", "종료일은 시작일보다 빨리 설정할 수 없습니다."));
+		// 4. 날짜 역전 체크 (날짜가 있을 때만 체크)
+		if (dto.getStartDate() != null && dto.getEndDate() != null) {
+		    if (dto.getEndDate().compareTo(dto.getStartDate()) < 0) {
+		        return ResponseEntity.status(400)
+		            .body(Map.of("message", "종료일은 시작일보다 빨리 설정할 수 없습니다."));
+		    }
 		}
 		
-		// 5. 예약 날짜 역전 체크
-		if (dto.getReservationEndDate().compareTo(dto.getReservationStartDate()) < 0) {
-		return ResponseEntity.status(400)
-		.body(Map.of("message", "예약 종료일은 예약 시작일보다 빨리 설정할 수 없습니다."));
+		// 5. 예약 날짜 역전 체크 (날짜가 있을 때만 체크)
+		if (dto.getReservationStartDate() != null && dto.getReservationEndDate() != null) {
+		    if (dto.getReservationEndDate().compareTo(dto.getReservationStartDate()) < 0) {
+		        return ResponseEntity.status(400)
+		            .body(Map.of("message", "예약 종료일은 예약 시작일보다 빨리 설정할 수 없습니다."));
+		    }
 		}
 		
 		// 6. 메인 이미지 저장 (새 이미지 있으면 교체, 없으면 기존 유지)
@@ -172,46 +176,48 @@ public class PopupService {
 		mainImageUrl = saveImage(mainImage);
 		}
 		
-		// 7. VO에 담기
-		popup.setTitle(dto.getTitle());
-		popup.setCategoryId(dto.getCategoryId());
-		popup.setRegionId(dto.getRegionId());
-		popup.setAddress(dto.getAddress());
-		popup.setStartDate(dto.getStartDate());
-		popup.setEndDate(dto.getEndDate());
-		popup.setReservationStartDate(dto.getReservationStartDate());
-		popup.setReservationEndDate(dto.getReservationEndDate());
-		popup.setNotice(dto.getNotice());
-		popup.setBenefit(dto.getBenefit());
-		popup.setInfo(dto.getInfo());
-		popup.setSnsUrl(dto.getSnsUrl());
+		// 7. VO에 담기 (null이면 기존 값 유지)
+		if (dto.getTitle() != null) popup.setTitle(dto.getTitle());
+		if (dto.getCategoryId() != null) popup.setCategoryId(dto.getCategoryId());
+		if (dto.getRegionId() != null) popup.setRegionId(dto.getRegionId());
+		if (dto.getAddress() != null) popup.setAddress(dto.getAddress());
+		if (dto.getStartDate() != null) popup.setStartDate(dto.getStartDate());
+		if (dto.getEndDate() != null) popup.setEndDate(dto.getEndDate());
+		if (dto.getReservationStartDate() != null) popup.setReservationStartDate(dto.getReservationStartDate());
+		if (dto.getReservationEndDate() != null) popup.setReservationEndDate(dto.getReservationEndDate());
+		if (dto.getNotice() != null) popup.setNotice(dto.getNotice());
+		if (dto.getBenefit() != null) popup.setBenefit(dto.getBenefit());
+		if (dto.getInfo() != null) popup.setInfo(dto.getInfo());
+		if (dto.getSnsUrl() != null) popup.setSnsUrl(dto.getSnsUrl());
 		popup.setMainImageUrl(mainImageUrl);
 		
-		// 위도/경도 변환 추가
-		double[] coordinates = kakaoApiService.getCoordinates(dto.getAddress());
-		if (coordinates != null) {
-		    popup.setLatitude(coordinates[0]);
-		    popup.setLongitude(coordinates[1]);
+		// 위도/경도 변환 (주소가 있을 때만)
+		if (dto.getAddress() != null) {
+		    double[] coordinates = kakaoApiService.getCoordinates(dto.getAddress());
+		    if (coordinates != null) {
+		        popup.setLatitude(coordinates[0]);
+		        popup.setLongitude(coordinates[1]);
+		    }
 		}
 		
 		// 8. 팝업 수정
 		popupMapper.update(popup);
 		
-		// 9. 상세 이미지 수정 (기존 삭제 후 재등록)
-		popupMapper.deleteImages(id);
+		// 9. 상세 이미지 수정 (이미지가 있을 때만 삭제 후 재등록)
 		if (detailImages != null && !detailImages.isEmpty()) {
-		for (int i = 0; i < detailImages.size(); i++) {
-		String detailImageUrl = saveImage(detailImages.get(i));
-		popupMapper.insertImage(id, detailImageUrl, i + 1);
-		}
+		    popupMapper.deleteImages(id);
+		    for (int i = 0; i < detailImages.size(); i++) {
+		        String detailImageUrl = saveImage(detailImages.get(i));
+		        popupMapper.insertImage(id, detailImageUrl, i + 1);
+		    }
 		}
 		
-		// 10. 태그 수정 (기존 삭제 후 재등록)
-		popupMapper.deleteTags(id);
+		// 10. 태그 수정 (태그가 있을 때만 삭제 후 재등록)
 		if (tags != null && !tags.isEmpty()) {
-		for (String tag : tags) {
-		popupMapper.insertTag(id, tag);
-		}
+		    popupMapper.deleteTags(id);
+		    for (String tag : tags) {
+		        popupMapper.insertTag(id, tag);
+		    }
 		}
 		
 		return ResponseEntity.ok(Map.of("id", id, "message", "팝업이 수정되었습니다."));
