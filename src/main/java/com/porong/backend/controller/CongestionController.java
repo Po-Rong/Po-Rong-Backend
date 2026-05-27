@@ -1,11 +1,14 @@
 package com.porong.backend.controller;
 
-import com.porong.backend.dto.response.CongestionResponseDto;
-import com.porong.backend.service.CongestionService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.porong.backend.dto.response.CongestionResponseDto;
+import com.porong.backend.service.CongestionService;
+
+import lombok.RequiredArgsConstructor;
+
+@CrossOrigin(origins="*")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/popups")
