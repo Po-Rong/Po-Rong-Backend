@@ -15,8 +15,8 @@ public interface UserMapper {
 	
 //	회원 가입 INSERT
 //	id, role, created_at 은 DB에서 자동 생성되므로 쿼리에서 제외
-	@Insert("INSERT INTO users(email, password, nickname) "
-			+ "VALUES (#{email},#{password},#{nickname})")
+	@Insert("INSERT INTO users(email, password, nickname, role) "
+			+ "VALUES (#{email},#{password},#{nickname}, #{role})")
 	@Options(useGeneratedKeys = true, keyProperty = "id")
 	int insert(UserVO user);
 	
