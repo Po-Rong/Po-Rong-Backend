@@ -99,8 +99,8 @@ public class ReservationController {
     // 판매자용 - 팝업 예약자 목록 조회
     @GetMapping
     public ResponseEntity<?> getReservationsByPopup(
-        @RequestParam("popup_id") Long popupId,
-        @RequestParam("seller_id") Long sellerId) {
+    	    @RequestParam(value = "popup_id", required = false) Long popupId,
+    	    @RequestParam("seller_id") Long sellerId) {
         return reservationService.getReservationsByPopup(popupId, sellerId);
     }
 }

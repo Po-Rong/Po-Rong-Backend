@@ -81,19 +81,24 @@ public class ReservationService {
                 .body(Map.of("message", "판매자만 조회할 수 있습니다."));
         }
 
-        // 2. 본인 팝업 여부 체크
-        Long ownerId = reservationMapper.findOwnerByPopupId(popupId);
-        if (ownerId == null) {
-            return ResponseEntity.status(404)
-                .body(Map.of("message", "존재하지 않는 팝업입니다."));
-        }
-        if (!ownerId.equals(sellerId)) {
-            return ResponseEntity.status(403)
-                .body(Map.of("message", "본인이 등록한 팝업만 조회할 수 있습니다."));
-        }
+        List<ReservationVO> reservations;
 
-        // 3. 예약자 목록 조회
-        List<ReservationVO> reservations = reservationMapper.findByPopupId(popupId);
+        if (popupId != null) {
+            // 2. 본인 팝업 여부 체크
+            Long ownerId = reservationMapper.findOwnerByPopupId(popupId);
+            if (ownerId == null) {
+                return ResponseEntity.status(404)
+                    .body(Map.of("message", "존재하지 않는 팝업입니다."));
+            }
+            if (!ownerId.equals(sellerId)) {
+                return ResponseEntity.status(403)
+                    .body(Map.of("message", "본인이 등록한 팝업만 조회할 수 있습니다."));
+            }
+            reservations = reservationMapper.findByPopupId(popupId);
+        } else {
+            // popup_id 없으면 판매자 전체 팝업 예약자 조회
+            reservations = reservationMapper.findAllBySellerId(sellerId);
+        }
 
         return ResponseEntity.ok(reservations);
     }
