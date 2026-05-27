@@ -62,4 +62,10 @@ public interface ReservationMapper {
     // 팝업 소유자 체크
     @Select("SELECT user_id FROM popups WHERE id = #{popupId}")
     Long findOwnerByPopupId(Long popupId);
+    
+    // 판매자 전체 팝업 예약자 조회
+    @Select("SELECT r.* FROM reservations r " +
+            "JOIN popups p ON r.popup_id = p.id " +
+            "WHERE p.user_id = #{sellerId}")
+    List<ReservationVO> findAllBySellerId(Long sellerId);
 }
