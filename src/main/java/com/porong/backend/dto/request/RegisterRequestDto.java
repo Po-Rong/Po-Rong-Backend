@@ -12,5 +12,6 @@ public class RegisterRequestDto {
 	private String email;
 	private String nickname;
 	private String password;
+	private String role; 
 
 }
