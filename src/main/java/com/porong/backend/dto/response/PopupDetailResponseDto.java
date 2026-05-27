@@ -17,7 +17,6 @@ import lombok.NoArgsConstructor;
     "reservationStartDate", "reservationEndDate", "avgRating", "reviewCount", "createdAt"})
 public class PopupDetailResponseDto {
     private Long id;
-    private String status;
     private String title;
     private String categoryName;
     private String regionName;
