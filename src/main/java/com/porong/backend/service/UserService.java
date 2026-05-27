@@ -43,6 +43,7 @@ public class UserService {
         user.setEmail(dto.getEmail());
         user.setPassword(dto.getPassword());
         user.setNickname(dto.getNickname());
+        user.setRole(dto.getRole() != null ? dto.getRole() : "user");
         
         // 5. DB 저장
         userMapper.insert(user);
