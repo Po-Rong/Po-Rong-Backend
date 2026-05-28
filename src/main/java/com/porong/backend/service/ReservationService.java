@@ -101,4 +101,32 @@ public class ReservationService {
             "hasNext", hasNext
         ));
     }
+    
+    // 6. 판매자용 - 팝업 예약자 예약 취소
+    public ResponseEntity<?> cancelReservationBySeller(Long reservationId, Long sellerId) {
+        // 1. seller 여부 체크
+        String role = reservationMapper.findRoleById(sellerId);
+        if (role == null || !role.equals("seller")) {
+            return ResponseEntity.status(403)
+                .body(Map.of("message", "판매자만 취소할 수 있습니다."));
+        }
+
+        // 2. 예약 존재 여부 체크
+        ReservationVO reservation = reservationMapper.findById(reservationId);
+        if (reservation == null) {
+            return ResponseEntity.status(404)
+                .body(Map.of("message", "존재하지 않는 예약입니다."));
+        }
+
+        // 3. 본인 팝업 예약인지 체크
+        Long ownerId = reservationMapper.findOwnerByPopupId(reservation.getPopupId());
+        if (!ownerId.equals(sellerId)) {
+            return ResponseEntity.status(403)
+                .body(Map.of("message", "본인 팝업의 예약만 취소할 수 있습니다."));
+        }
+
+        // 4. 취소 처리
+        reservationMapper.cancelReservationBySeller(reservationId);
+        return ResponseEntity.ok(Map.of("message", "예약이 취소되었습니다."));
+    }
 }

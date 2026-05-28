@@ -63,13 +63,13 @@ public interface ReservationMapper {
     @Select("SELECT user_id FROM popups WHERE id = #{popupId}")
     Long findOwnerByPopupId(Long popupId);
     
- // 판매자 전체 팝업 예약자 조회
+    // 판매자 전체 팝업 예약자 조회
     @Select("SELECT r.* FROM reservations r " +
             "JOIN popups p ON r.popup_id = p.id " +
             "WHERE p.user_id = #{sellerId}")
     List<ReservationVO> findAllBySellerId(Long sellerId);
 
- // 판매자 팝업의 예약 날짜 목록 페이징 조회 (날짜 중복 제거)
+    // 판매자 팝업의 예약 날짜 목록 페이징 조회 (날짜 중복 제거)
     @Select("SELECT DISTINCT DATE(reserve_date) as date " +
             "FROM reservations r " +
             "JOIN popups p ON r.popup_id = p.id " +
@@ -97,4 +97,12 @@ public interface ReservationMapper {
             "WHERE p.user_id = #{sellerId} " +
             "AND r.status IN ('CONFIRMED', 'CANCELED')")
     int countDistinctDatesBySellerId(Long sellerId);
+    
+    // 예약 단건 조회
+    @Select("SELECT * FROM reservations WHERE id = #{reservationId}")
+    ReservationVO findById(Long reservationId);
+
+    // 판매자 예약 취소
+    @Update("UPDATE reservations SET status = 'CANCELED' WHERE id = #{reservationId}")
+    void cancelReservationBySeller(Long reservationId);
 }
