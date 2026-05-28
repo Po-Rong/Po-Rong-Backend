@@ -10,6 +10,7 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
+import com.porong.backend.dto.response.AdminReviewResponseDto;
 import com.porong.backend.dto.response.ReviewListResponseDto;
 import com.porong.backend.vo.ReviewVO;
 
@@ -101,10 +102,14 @@ public interface ReviewMapper {
     List<ReviewVO> findByPopupId(Long popupId);
 
     // 판매자 전체 팝업 리뷰 조회
-    @Select("SELECT r.* FROM reviews r " +
+    @Select("SELECT r.*, u.nickname, p.title as popupTitle, " +
+            "p.main_image_url as popupMainImageUrl, c.category_name as categoryName " +
+            "FROM reviews r " +
             "JOIN popups p ON r.popup_id = p.id " +
+            "JOIN users u ON r.user_id = u.id " +
+            "JOIN categories c ON p.category_id = c.id " +
             "WHERE p.user_id = #{sellerId}")
-    List<ReviewVO> findAllBySellerId(Long sellerId);
+    List<AdminReviewResponseDto> findAllBySellerId(Long sellerId);
     
     @Select("""
     	    SELECT COUNT(*) > 0 
