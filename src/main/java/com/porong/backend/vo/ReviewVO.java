@@ -18,5 +18,6 @@ public class ReviewVO {
     private String reviewImageUrl;   // 리뷰 이미지 파일 URL (NULL 허용)
     private Long popupId;            // 대상 팝업 스토어 ID (외래키)
     private Long userId;             // 작성자 회원 ID (외래키)
+    private Long reservationId;		// 예약 ID (외래키)
     private LocalDateTime createdAt; // 작성 시간 (DEFAULT CURRENT_TIMESTAMP)
 }

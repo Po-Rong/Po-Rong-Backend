@@ -52,6 +52,7 @@ public class ReviewService {
         review.setReviewImageUrl(dto.getReviewImageUrl());
         review.setPopupId(popupId);
         review.setUserId(dto.getUserId());
+        review.setReservationId(dto.getReservationId());
 
         reviewMapper.insertReview(review); // @Options에 의해 review.getId() 채워짐
 

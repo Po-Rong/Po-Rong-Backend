@@ -33,7 +33,8 @@ public interface ReviewMapper {
 	            r.rating
 	        FROM reviews r
 	        INNER JOIN users u ON r.user_id = u.id
-	        LEFT JOIN reservations res ON r.user_id = res.user_id AND r.popup_id = res.popup_id
+	        -- 📍 [수정] 1:1 매핑된 예약 ID 조건으로 정확하게 조인
+	        INNER JOIN reservations res ON r.reservation_id = res.id 
 	        WHERE r.popup_id = #{popupId}
 	        <choose>
 	            <when test="sort == 'rating_high'">
@@ -56,10 +57,12 @@ public interface ReviewMapper {
 	ReviewVO findById(Long id);
 
     // 리뷰 등록
-    @Insert("INSERT INTO reviews (content, rating, congestion_level, review_image_url, popup_id, user_id) "
-          + "VALUES (#{content}, #{rating}, #{congestionLevel}, #{reviewImageUrl}, #{popupId}, #{userId})")
-    @Options(useGeneratedKeys = true, keyProperty = "id")
-    int insertReview(ReviewVO review);
+	@Insert("""
+	        INSERT INTO reviews (content, rating, congestion_level, review_image_url, popup_id, user_id, reservation_id) 
+	        VALUES (#{content}, #{rating}, #{congestionLevel}, #{reviewImageUrl}, #{popupId}, #{userId}, #{reservationId})
+	    """)
+	    @Options(useGeneratedKeys = true, keyProperty = "id")
+	    int insertReview(ReviewVO review);
 
     // 리뷰 수정
     @Update("UPDATE reviews SET content = #{content}, rating = #{rating}, "
