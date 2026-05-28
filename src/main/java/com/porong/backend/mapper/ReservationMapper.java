@@ -63,9 +63,38 @@ public interface ReservationMapper {
     @Select("SELECT user_id FROM popups WHERE id = #{popupId}")
     Long findOwnerByPopupId(Long popupId);
     
-    // 판매자 전체 팝업 예약자 조회
+ // 판매자 전체 팝업 예약자 조회
     @Select("SELECT r.* FROM reservations r " +
             "JOIN popups p ON r.popup_id = p.id " +
             "WHERE p.user_id = #{sellerId}")
     List<ReservationVO> findAllBySellerId(Long sellerId);
+
+ // 판매자 팝업의 예약 날짜 목록 페이징 조회 (날짜 중복 제거)
+    @Select("SELECT DISTINCT DATE(reserve_date) as date " +
+            "FROM reservations r " +
+            "JOIN popups p ON r.popup_id = p.id " +
+            "WHERE p.user_id = #{sellerId} " +
+            "AND r.status IN ('CONFIRMED', 'CANCELED') " +
+            "ORDER BY date ASC " +
+            "LIMIT #{size} OFFSET #{offset}")
+    List<String> findDistinctDatesBySellerId(@Param("sellerId") Long sellerId,
+                                              @Param("size") int size,
+                                              @Param("offset") int offset);
+
+    // 판매자 팝업의 특정 날짜 예약자 목록 조회
+    @Select("SELECT r.* FROM reservations r " +
+            "JOIN popups p ON r.popup_id = p.id " +
+            "WHERE p.user_id = #{sellerId} " +
+            "AND DATE(r.reserve_date) = #{date} " +
+            "AND r.status IN ('CONFIRMED', 'CANCELED')")
+    List<ReservationVO> findBySellerIdAndDate(@Param("sellerId") Long sellerId,
+                                               @Param("date") String date);
+
+    // 판매자 팝업의 전체 예약 날짜 수 조회 (페이징 처리용)
+    @Select("SELECT COUNT(DISTINCT DATE(reserve_date)) " +
+            "FROM reservations r " +
+            "JOIN popups p ON r.popup_id = p.id " +
+            "WHERE p.user_id = #{sellerId} " +
+            "AND r.status IN ('CONFIRMED', 'CANCELED')")
+    int countDistinctDatesBySellerId(Long sellerId);
 }
