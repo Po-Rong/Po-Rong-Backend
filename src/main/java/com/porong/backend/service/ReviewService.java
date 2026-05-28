@@ -63,16 +63,14 @@ public class ReviewService {
         String keyringName = "";
         String responseMessage = nextReviewCount + "번째 리뷰가 성공적으로 등록되었습니다!";
 
-        // 1~5번째 리뷰 조건에 걸려 매칭되는 캐릭터 키링이 존재한다면 도감 지급
+        // 1~5번째 리뷰 조건에 걸려 매칭되는 캐릭터 키링이 존재한다면
         if (keyringMap != null) {
-            // 마이바티스 Map 결과 추출 시 숫자형 타입 안전하게 변환 처리
             earnedKeyringId = ((Number) keyringMap.get("id")).longValue();
             keyringName = (String) keyringMap.get("name");
 
-            // 유저 도감(collection_books) 테이블에 획득 기록 인서트
+            // 리뷰 수에 맞게 인서트
             reviewMapper.insertCollectionBook(dto.getUserId(), earnedKeyringId, popupId);
             
-            // 명세서 맞춤형 동적 축하 메시지 생성
             responseMessage = nextReviewCount + "번째 리뷰가 등록되었으며, '" + keyringName + "' 키링이 도감에 지급되었습니다!";
         }
 
