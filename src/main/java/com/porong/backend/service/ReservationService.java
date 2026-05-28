@@ -1,5 +1,7 @@
 package com.porong.backend.service;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -72,34 +74,59 @@ public class ReservationService {
     }
     
     // 5. 판매자용 - 팝업 예약자 목록 조회
-    public ResponseEntity<?> getReservationsByPopup(Long popupId, Long sellerId) {
-
-        // 1. seller 여부 체크
+    public ResponseEntity<?> getReservationsByPopup(Long popupId, Long sellerId, int page, int size) {
         String role = reservationMapper.findRoleById(sellerId);
         if (role == null || !role.equals("seller")) {
             return ResponseEntity.status(403)
                 .body(Map.of("message", "판매자만 조회할 수 있습니다."));
         }
 
-        List<ReservationVO> reservations;
+        int offset = page * size;
+        List<String> dates = reservationMapper.findDistinctDatesBySellerId(sellerId, size, offset);
+        int totalDates = reservationMapper.countDistinctDatesBySellerId(sellerId);
+        boolean hasNext = (offset + size) < totalDates;
 
-        if (popupId != null) {
-            // 2. 본인 팝업 여부 체크
-            Long ownerId = reservationMapper.findOwnerByPopupId(popupId);
-            if (ownerId == null) {
-                return ResponseEntity.status(404)
-                    .body(Map.of("message", "존재하지 않는 팝업입니다."));
-            }
-            if (!ownerId.equals(sellerId)) {
-                return ResponseEntity.status(403)
-                    .body(Map.of("message", "본인이 등록한 팝업만 조회할 수 있습니다."));
-            }
-            reservations = reservationMapper.findByPopupId(popupId);
-        } else {
-            // popup_id 없으면 판매자 전체 팝업 예약자 조회
-            reservations = reservationMapper.findAllBySellerId(sellerId);
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (String date : dates) {
+            List<ReservationVO> reservations = reservationMapper.findBySellerIdAndDate(sellerId, date);
+            Map<String, Object> group = new LinkedHashMap<>();
+            group.put("date", date);
+            group.put("reservations", reservations);
+            result.add(group);
         }
 
-        return ResponseEntity.ok(reservations);
+        return ResponseEntity.ok(Map.of(
+            "content", result,
+            "currentPage", page,
+            "hasNext", hasNext
+        ));
+    }
+    
+    // 6. 판매자용 - 팝업 예약자 예약 취소
+    public ResponseEntity<?> cancelReservationBySeller(Long reservationId, Long sellerId) {
+        // 1. seller 여부 체크
+        String role = reservationMapper.findRoleById(sellerId);
+        if (role == null || !role.equals("seller")) {
+            return ResponseEntity.status(403)
+                .body(Map.of("message", "판매자만 취소할 수 있습니다."));
+        }
+
+        // 2. 예약 존재 여부 체크
+        ReservationVO reservation = reservationMapper.findById(reservationId);
+        if (reservation == null) {
+            return ResponseEntity.status(404)
+                .body(Map.of("message", "존재하지 않는 예약입니다."));
+        }
+
+        // 3. 본인 팝업 예약인지 체크
+        Long ownerId = reservationMapper.findOwnerByPopupId(reservation.getPopupId());
+        if (!ownerId.equals(sellerId)) {
+            return ResponseEntity.status(403)
+                .body(Map.of("message", "본인 팝업의 예약만 취소할 수 있습니다."));
+        }
+
+        // 4. 취소 처리
+        reservationMapper.cancelReservationBySeller(reservationId);
+        return ResponseEntity.ok(Map.of("message", "예약이 취소되었습니다."));
     }
 }
