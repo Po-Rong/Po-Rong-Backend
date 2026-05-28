@@ -30,10 +30,10 @@ public interface ReviewMapper {
 	            r.congestion_level,
 	            r.content,
 	            r.review_image_url,
-	            r.rating
+	            r.rating,
+	            r.reservation_id AS reservationId -- 📍 [추가] DB의 예약 ID를 응답 필드와 매핑
 	        FROM reviews r
 	        INNER JOIN users u ON r.user_id = u.id
-	        -- 📍 [수정] 1:1 매핑된 예약 ID 조건으로 정확하게 조인
 	        INNER JOIN reservations res ON r.reservation_id = res.id 
 	        WHERE r.popup_id = #{popupId}
 	        <choose>
@@ -105,4 +105,11 @@ public interface ReviewMapper {
             "JOIN popups p ON r.popup_id = p.id " +
             "WHERE p.user_id = #{sellerId}")
     List<ReviewVO> findAllBySellerId(Long sellerId);
+    
+    @Select("""
+    	    SELECT COUNT(*) > 0 
+    	    FROM collection_books 
+    	    WHERE user_id = #{userId} AND popup_id = #{popupId}
+    	""")
+    	boolean existsCollectionBook(@Param("userId") Long userId, @Param("popupId") Long popupId);
 }
