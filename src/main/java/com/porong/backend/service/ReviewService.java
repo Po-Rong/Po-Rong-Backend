@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.porong.backend.dto.request.ReviewRequestDto;
+import com.porong.backend.dto.response.AdminReviewResponseDto;
 import com.porong.backend.dto.response.ReviewCreateResponseDto;
 import com.porong.backend.dto.response.ReviewListResponseDto;
 import com.porong.backend.mapper.ReservationMapper;
@@ -137,17 +138,13 @@ public class ReviewService {
     // 판매자용 - 팝업 리뷰 목록 조회
     public ResponseEntity<?> getReviewsByPopup(Long popupId, Long sellerId) {
 
-        // 1. seller 여부 체크
         String role = reservationMapper.findRoleById(sellerId);
         if (role == null || !role.equals("seller")) {
             return ResponseEntity.status(403)
                 .body(Map.of("message", "판매자만 조회할 수 있습니다."));
         }
 
-        List<ReviewVO> reviews;
-
         if (popupId != null) {
-            // 2. 본인 팝업 여부 체크
             Long ownerId = reservationMapper.findOwnerByPopupId(popupId);
             if (ownerId == null) {
                 return ResponseEntity.status(404)
@@ -157,14 +154,12 @@ public class ReviewService {
                 return ResponseEntity.status(403)
                     .body(Map.of("message", "본인이 등록한 팝업만 조회할 수 있습니다."));
             }
-            // 3. 특정 팝업 리뷰 조회
-            reviews = reviewMapper.findByPopupId(popupId);
+            List<ReviewVO> reviews = reviewMapper.findByPopupId(popupId);
+            return ResponseEntity.ok(reviews);
         } else {
-            // 3. 판매자 전체 팝업 리뷰 조회
-            reviews = reviewMapper.findAllBySellerId(sellerId);
+            List<AdminReviewResponseDto> reviews = reviewMapper.findAllBySellerId(sellerId);
+            return ResponseEntity.ok(reviews);
         }
-
-        return ResponseEntity.ok(reviews);
     }
 
 }
