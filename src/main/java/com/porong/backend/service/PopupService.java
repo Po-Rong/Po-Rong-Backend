@@ -127,7 +127,7 @@ public class PopupService {
             
             file.transferTo(new File(filePath));
             
-            return "/uploads/" + fileName;
+            return "http://localhost:8080/uploads/" + fileName;
         } catch (IOException e) {
             throw new RuntimeException("이미지 저장 실패", e);
         }
@@ -276,7 +276,7 @@ public class PopupService {
             dto.setTitle((String) popup.get("title"));
             dto.setCategoryName((String) popup.get("category_name"));
             dto.setRegionName((String) popup.get("region_name"));
-            dto.setMainImageUrl((String) popup.get("main_image_url"));
+            dto.setMainImageUrl(resolveImageUrl((String) popup.get("main_image_url")));
             dto.setStartDate(popup.get("start_date").toString());
             dto.setEndDate(popup.get("end_date").toString());
             dto.setAvgRating(((Number) popup.get("avg_rating")).doubleValue());
@@ -312,8 +312,10 @@ public class PopupService {
         dto.setCategoryName((String) popup.get("category_name"));
         dto.setRegionName((String) popup.get("region_name"));
         dto.setAddress((String) popup.get("address"));
-        dto.setMainImageUrl((String) popup.get("main_image_url"));
-        dto.setDetailImages(detailImages);
+        dto.setMainImageUrl(resolveImageUrl((String) popup.get("main_image_url")));
+        dto.setDetailImages(detailImages.stream()
+        	    .map(this::resolveImageUrl)
+        	    .collect(Collectors.toList()));
         dto.setTags(tags);
         dto.setNotice((String) popup.get("notice"));
         dto.setBenefit((String) popup.get("benefit"));
@@ -330,5 +332,10 @@ public class PopupService {
         dto.setCreatedAt(popup.get("created_at").toString());
 
         return ResponseEntity.ok(dto);
+    }
+    
+    private String resolveImageUrl(String url) {
+        if (url == null) return null;
+        return url.startsWith("http") ? url : "http://localhost:8080" + url;
     }
 }
