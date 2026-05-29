@@ -31,6 +31,12 @@ public class ReviewController {
             @RequestParam(value = "sort", required = false) String sort) {
         return reviewService.getReviewsByPopupId(popupId, sort);
     }
+    
+    // 최신 리뷰 3건 리스트
+    @GetMapping("/reviews/recent")
+    public ResponseEntity<?> getRecentThreeReviews() {
+        return reviewService.getRecentThreeReviews();
+    }
 
     // 리뷰 등록 + 누적 개수별 산리오 키링 증정
     // POST /api/popups/{popupId}/reviews

@@ -1,6 +1,7 @@
 package com.porong.backend.mapper;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
@@ -117,4 +118,32 @@ public interface ReviewMapper {
     	    WHERE user_id = #{userId} AND popup_id = #{popupId}
     	""")
     	boolean existsCollectionBook(@Param("userId") Long userId, @Param("popupId") Long popupId);
+    
+//    최근 리뷰 3건 조회
+    @Select("""
+            SELECT 
+                r.id AS reviewId,
+                r.user_id AS userId,
+                u.nickname,
+                p.id AS popupId,
+                p.title AS popupTitle,
+                p.main_image_url AS popupMainImageUrl,
+                r.content,
+                r.rating,
+                r.congestion_level AS congestionLevel,
+                r.review_image_url AS reviewImageUrl,
+                DATE_FORMAT(r.created_at, '%Y-%m-%d %H:%i:%s') AS createdAt,
+                DATE_FORMAT(res.reserve_date, '%Y-%m-%d') AS reserveDate,
+                CASE 
+                    WHEN DATE_FORMAT(res.reserve_date, '%H') < 12 THEN DATE_FORMAT(res.reserve_date, '오전 %h시')
+                    ELSE DATE_FORMAT(res.reserve_date, '오후 %h시')
+                END AS reserveTime
+            FROM reviews r
+            INNER JOIN users u ON r.user_id = u.id
+            INNER JOIN popups p ON r.popup_id = p.id
+            INNER JOIN reservations res ON r.reservation_id = res.id
+            ORDER BY res.reserve_date DESC
+            LIMIT 3
+        """)
+        List<Map<String, Object>> selectRecentThreeReviews();
 }
