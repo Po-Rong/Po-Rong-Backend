@@ -109,21 +109,25 @@ public class PopupService {
     // 이미지 저장 메서드
     private String saveImage(MultipartFile file) {
         try {
-            // 프로젝트 루트 경로 기준으로 uploads 폴더 절대 경로 설정
             String uploadDir = System.getProperty("user.dir") + "/uploads/";
             
-            // uploads 폴더 없으면 자동 생성
             File dir = new File(uploadDir);
             if (!dir.exists()) {
                 dir.mkdirs();
             }
             
-            String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+            // 쿼리스트링 제거
+            String originalFilename = file.getOriginalFilename();
+            if (originalFilename != null && originalFilename.contains("?")) {
+                originalFilename = originalFilename.split("\\?")[0];
+            }
+            
+            String fileName = UUID.randomUUID() + "_" + originalFilename;
             String filePath = uploadDir + fileName;
             
             file.transferTo(new File(filePath));
             
-            return "/uploads/" + fileName;
+            return "http://localhost:8080/uploads/" + fileName;
         } catch (IOException e) {
             throw new RuntimeException("이미지 저장 실패", e);
         }
@@ -272,7 +276,7 @@ public class PopupService {
             dto.setTitle((String) popup.get("title"));
             dto.setCategoryName((String) popup.get("category_name"));
             dto.setRegionName((String) popup.get("region_name"));
-            dto.setMainImageUrl((String) popup.get("main_image_url"));
+            dto.setMainImageUrl(resolveImageUrl((String) popup.get("main_image_url")));
             dto.setStartDate(popup.get("start_date").toString());
             dto.setEndDate(popup.get("end_date").toString());
             dto.setAvgRating(((Number) popup.get("avg_rating")).doubleValue());
@@ -319,8 +323,10 @@ public class PopupService {
         dto.setCategoryName((String) popup.get("category_name"));
         dto.setRegionName((String) popup.get("region_name"));
         dto.setAddress((String) popup.get("address"));
-        dto.setMainImageUrl((String) popup.get("main_image_url"));
-        dto.setDetailImages(detailImages);
+        dto.setMainImageUrl(resolveImageUrl((String) popup.get("main_image_url")));
+        dto.setDetailImages(detailImages.stream()
+        	    .map(this::resolveImageUrl)
+        	    .collect(Collectors.toList()));
         dto.setTags(tags);
         dto.setNotice((String) popup.get("notice"));
         dto.setBenefit((String) popup.get("benefit"));
@@ -337,5 +343,10 @@ public class PopupService {
         dto.setCreatedAt(popup.get("created_at").toString());
 
         return ResponseEntity.ok(dto);
+    }
+    
+    private String resolveImageUrl(String url) {
+        if (url == null) return null;
+        return url.startsWith("http") ? url : "http://localhost:8080" + url;
     }
 }

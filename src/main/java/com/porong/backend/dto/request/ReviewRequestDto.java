@@ -13,5 +13,4 @@ public class ReviewRequestDto {
     private Integer rating;
     private String congestionLevel;
     private Long reservationId;
-    private String reviewImageUrl;
 }
