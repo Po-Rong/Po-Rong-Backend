@@ -65,5 +65,16 @@ public class WishlistService {
         // 2. 응답 반환 (명세서의 배열 형태로 200 OK 리턴)
         return ResponseEntity.ok(wishlist);
     }
+    
+ // 특정 팝업스토어 찜 목록 조회 (GET /api/wishlists/popups/{popupId})
+    @Transactional(readOnly = true)
+    public ResponseEntity<List<MyWishlistResponseDto>> getWishlistByPopupId(Long popupId) {
+        
+        // 1. Mapper를 통해 해당 팝업을 찜한 목록 조회
+        List<MyWishlistResponseDto> wishlist = wishlistMapper.selectWishlistByPopupId(popupId);
+        
+        // 2. 응답 반환
+        return ResponseEntity.ok(wishlist);
+    }
 
 }

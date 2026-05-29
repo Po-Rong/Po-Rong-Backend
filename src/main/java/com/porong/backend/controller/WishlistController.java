@@ -1,5 +1,7 @@
 package com.porong.backend.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.porong.backend.dto.request.WishlistRequestDto;
+import com.porong.backend.dto.response.MyWishlistResponseDto;
 import com.porong.backend.service.WishlistService;
 
 @RestController
@@ -35,5 +38,11 @@ public class WishlistController {
             @RequestBody WishlistRequestDto request) {
         return wishlistService.toggleWishlist(request.getUserId(), popupId);
     }
+	
+	// 특정 팝업스토어의 찜 정보 조회
+	@GetMapping("/popups/{popupId}")
+	public ResponseEntity<List<MyWishlistResponseDto>> getWishlistByPopupId(@PathVariable("popupId") Long popupId) {
+	    return wishlistService.getWishlistByPopupId(popupId);
+	}
 
 }
