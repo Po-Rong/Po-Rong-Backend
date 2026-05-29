@@ -161,5 +161,12 @@ public class ReviewService {
             return ResponseEntity.ok(reviews);
         }
     }
+    
+    // 최근 리뷰 3건 조회
+    @Transactional(readOnly = true)
+    public ResponseEntity<?> getRecentThreeReviews() {
+        List<Map<String, Object>> recentReviews = reviewMapper.selectRecentThreeReviews();
+        return ResponseEntity.ok(recentReviews);
+    }
 
 }
