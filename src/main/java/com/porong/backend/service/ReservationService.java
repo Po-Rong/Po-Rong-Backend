@@ -88,7 +88,7 @@ public class ReservationService {
 
         List<Map<String, Object>> result = new ArrayList<>();
         for (String date : dates) {
-            List<ReservationVO> reservations = reservationMapper.findBySellerIdAndDate(sellerId, date);
+            List<ReservationResponseDto> reservations = reservationMapper.findBySellerIdAndDate(sellerId, date);
             Map<String, Object> group = new LinkedHashMap<>();
             group.put("date", date);
             group.put("reservations", reservations);

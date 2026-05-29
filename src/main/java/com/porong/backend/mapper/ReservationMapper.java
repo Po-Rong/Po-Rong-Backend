@@ -82,13 +82,14 @@ public interface ReservationMapper {
                                               @Param("offset") int offset);
 
     // 판매자 팝업의 특정 날짜 예약자 목록 조회
-    @Select("SELECT r.* FROM reservations r " +
+    @Select("SELECT r.*, p.title as popupTitle, p.main_image_url as mainImageUrl " +
+            "FROM reservations r " +
             "JOIN popups p ON r.popup_id = p.id " +
             "WHERE p.user_id = #{sellerId} " +
             "AND DATE(r.reserve_date) = #{date} " +
             "AND r.status IN ('CONFIRMED', 'CANCELED')")
-    List<ReservationVO> findBySellerIdAndDate(@Param("sellerId") Long sellerId,
-                                               @Param("date") String date);
+    List<ReservationResponseDto> findBySellerIdAndDate(@Param("sellerId") Long sellerId,
+                                                        @Param("date") String date);
 
     // 판매자 팝업의 전체 예약 날짜 수 조회 (페이징 처리용)
     @Select("SELECT COUNT(DISTINCT DATE(reserve_date)) " +
