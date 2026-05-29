@@ -109,16 +109,20 @@ public class PopupService {
     // 이미지 저장 메서드
     private String saveImage(MultipartFile file) {
         try {
-            // 프로젝트 루트 경로 기준으로 uploads 폴더 절대 경로 설정
             String uploadDir = System.getProperty("user.dir") + "/uploads/";
             
-            // uploads 폴더 없으면 자동 생성
             File dir = new File(uploadDir);
             if (!dir.exists()) {
                 dir.mkdirs();
             }
             
-            String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+            // 쿼리스트링 제거
+            String originalFilename = file.getOriginalFilename();
+            if (originalFilename != null && originalFilename.contains("?")) {
+                originalFilename = originalFilename.split("\\?")[0];
+            }
+            
+            String fileName = UUID.randomUUID() + "_" + originalFilename;
             String filePath = uploadDir + fileName;
             
             file.transferTo(new File(filePath));

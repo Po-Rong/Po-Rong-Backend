@@ -103,11 +103,18 @@ public interface ReviewMapper {
 
     // 판매자 전체 팝업 리뷰 조회
     @Select("SELECT r.*, u.nickname, p.title as popupTitle, " +
-            "p.main_image_url as popupMainImageUrl, c.category_name as categoryName " +
+            "p.main_image_url as popupMainImageUrl, " +
+            "CASE " +
+            "  WHEN NOW() < p.start_date THEN 'upcoming' " +
+            "  WHEN NOW() > p.end_date THEN 'closed' " +
+            "  ELSE 'ongoing' " +
+            "END as popupStatus, " +
+            "c.category_name as categoryName, rg.region_name as regionName " +
             "FROM reviews r " +
             "JOIN popups p ON r.popup_id = p.id " +
             "JOIN users u ON r.user_id = u.id " +
             "JOIN categories c ON p.category_id = c.id " +
+            "JOIN regions rg ON p.region_id = rg.id " +
             "WHERE p.user_id = #{sellerId}")
     List<AdminReviewResponseDto> findAllBySellerId(Long sellerId);
     
