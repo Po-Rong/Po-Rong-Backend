@@ -41,4 +41,22 @@ public interface WishlistMapper {
         ORDER BY w.created_at DESC
     """)
     List<MyWishlistResponseDto> selectMyWishlist(Long userId);
+   
+
+	 // 특정 팝업스토어의 찜 목록 전체 조회
+	 @Select("""
+	     SELECT 
+	         w.id AS wishlistId,
+	         w.popup_id,
+	         p.title,
+	         p.main_image_url,
+	         p.address,
+	         p.status,
+	         w.created_at
+	     FROM wishlists w
+	     INNER JOIN popups p ON w.popup_id = p.id
+	     WHERE w.popup_id = #{popupId}
+	     ORDER BY w.created_at DESC
+	 """)
+	 List<MyWishlistResponseDto> selectWishlistByPopupId(Long popupId);
 }
