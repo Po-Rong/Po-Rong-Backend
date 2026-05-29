@@ -280,7 +280,18 @@ public class PopupService {
             dto.setStartDate(popup.get("start_date").toString());
             dto.setEndDate(popup.get("end_date").toString());
             dto.setAvgRating(((Number) popup.get("avg_rating")).doubleValue());
-            dto.setIsWishlisted(((Number) popup.get("is_wishlisted")).intValue() == 1);
+            
+            Object wishlistObj = popup.get("isWishlisted") != null ? popup.get("isWishlisted") : popup.get("is_wishlisted");
+            if (wishlistObj != null) {
+                if (wishlistObj instanceof Boolean) {
+                    dto.setIsWishlisted((Boolean) wishlistObj);
+                } else if (wishlistObj instanceof Number) {
+                    dto.setIsWishlisted(((Number) wishlistObj).intValue() == 1);
+                }
+            } else {
+                dto.setIsWishlisted(false);
+            }
+            
             return dto;
         }).collect(Collectors.toList());
 
