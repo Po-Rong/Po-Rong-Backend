@@ -1,17 +1,19 @@
 package com.porong.backend.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.porong.backend.dto.request.ReviewRequestDto;
 import com.porong.backend.service.ReviewService;
@@ -40,20 +42,44 @@ public class ReviewController {
 
     // 리뷰 등록 + 누적 개수별 산리오 키링 증정
     // POST /api/popups/{popupId}/reviews
-    @PostMapping("/popups/{popupId}/reviews")
+    @PostMapping(value = "/popups/{popupId}/reviews", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> createReview(
             @PathVariable("popupId") Long popupId,
-            @RequestBody ReviewRequestDto requestDto) {
-        return reviewService.createReview(popupId, requestDto);
+            @RequestParam("userId") Long userId,
+            @RequestParam("content") String content,
+            @RequestParam("rating") int rating,
+            @RequestParam("congestionLevel") String congestionLevel,
+            @RequestParam("reservationId") Long reservationId,
+            @RequestPart(value = "image", required = false) MultipartFile image) {
+
+        ReviewRequestDto requestDto = new ReviewRequestDto();
+        requestDto.setUserId(userId);
+        requestDto.setContent(content);
+        requestDto.setRating(rating);
+        requestDto.setCongestionLevel(congestionLevel);
+        requestDto.setReservationId(reservationId);
+
+        return reviewService.createReview(popupId, requestDto, image);
     }
 
     // 리뷰 수정 (본인 검증 403 처리)
     // PATCH /api/reviews/{reviewId}
-    @PatchMapping("/reviews/{reviewId}")
+    @PutMapping(value = "/reviews/{reviewId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> updateReview(
             @PathVariable("reviewId") Long reviewId,
-            @RequestBody ReviewRequestDto requestDto) {
-        return reviewService.updateReview(reviewId, requestDto);
+            @RequestParam("userId") Long userId,
+            @RequestParam("content") String content,
+            @RequestParam("rating") int rating,
+            @RequestParam("congestionLevel") String congestionLevel,
+            @RequestPart(value = "image", required = false) MultipartFile image) {
+
+        ReviewRequestDto requestDto = new ReviewRequestDto();
+        requestDto.setUserId(userId);
+        requestDto.setContent(content);
+        requestDto.setRating(rating);
+        requestDto.setCongestionLevel(congestionLevel);
+
+        return reviewService.updateReview(reviewId, requestDto, image);
     }
     
     // 리뷰 삭제 (본인 검증 403 처리)
