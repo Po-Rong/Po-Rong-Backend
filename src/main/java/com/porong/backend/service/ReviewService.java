@@ -200,5 +200,21 @@ public class ReviewService {
             throw new RuntimeException("이미지 저장 실패", e);
         }
     }
+    
+ // 리뷰 단건 조회
+    @Transactional(readOnly = true)
+    public ResponseEntity<?> getReviewById(Long reviewId) {
+        // Map을 반환하는 신규 매퍼 메서드 호출
+        Map<String, Object> review = reviewMapper.findReviewDetailById(reviewId);
+        
+        // 예외 처리
+        if (review == null || review.isEmpty()) {
+            return ResponseEntity.status(404)
+                    .body(Map.of("message", "존재하지 않거나 삭제된 리뷰입니다."));
+        }
+        
+        // 별도의 재가공 없이 매퍼가 뽑아온 데이터를 그대로 반환
+        return ResponseEntity.ok(review);
+    }
 
 }
