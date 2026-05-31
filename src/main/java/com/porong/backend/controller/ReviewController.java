@@ -90,4 +90,10 @@ public class ReviewController {
             @RequestParam("user_id") Long userId) {
         return reviewService.deleteReview(reviewId, userId);
     }
+    
+    // 리뷰 단건 조회
+    @GetMapping("/reviews/{reviewId}")
+    public ResponseEntity<?> getReviewById(@PathVariable("reviewId") Long reviewId) {
+        return reviewService.getReviewById(reviewId);
+    }
 }

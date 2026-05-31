@@ -57,6 +57,23 @@ public interface ReviewMapper {
 	@Select("SELECT id, content, rating, congestion_level, review_image_url, popup_id, user_id, created_at "
 		      + "FROM reviews WHERE id = #{id}")
 	ReviewVO findById(Long id);
+	
+	@Select("""
+	        SELECT 
+	            r.id AS reviewId, 
+	            r.content, 
+	            r.rating, 
+	            r.congestion_level AS congestionLevel, 
+	            r.review_image_url AS reviewImageUrl, 
+	            r.popup_id AS popupId, 
+	            r.user_id AS userId, 
+	            DATE_FORMAT(r.created_at, '%Y-%m-%d %H:%i:%s') AS createdAt,
+	            p.main_image_url AS popupMainImageUrl
+	        FROM reviews r
+	        INNER JOIN popups p ON r.popup_id = p.id
+	        WHERE r.id = #{id}
+	    """)
+	    Map<String, Object> findReviewDetailById(@Param("id") Long id);
 
     // 리뷰 등록
 	@Insert("""
