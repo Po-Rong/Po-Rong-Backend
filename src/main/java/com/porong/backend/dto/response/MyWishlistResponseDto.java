@@ -18,4 +18,8 @@ public class MyWishlistResponseDto {
     private String address;        // 팝업 주소
     private String status;         // 팝업 상태 (ongoing, upcoming, closed)
     private LocalDateTime createdAt; // 찜한 시간
+    private String regionName;       // regions 테이블에서 가져온 지역 이름
+    private String categoryName;     // categories 테이블에서 가져온 카테고리 이름    
+    private LocalDateTime startDate; // 운영 시작일
+    private LocalDateTime endDate;   // 운영 종료일
 }
