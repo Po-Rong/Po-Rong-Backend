@@ -11,6 +11,6 @@ import com.porong.backend.vo.CategoryVO;
 public interface CategoryMapper {
 	
     // 카테고리 전체 조회
-    @Select("SELECT * FROM categories")
+    @Select("SELECT * FROM categories ORDER BY id ASC")
     List<CategoryVO> findAll();
 }
