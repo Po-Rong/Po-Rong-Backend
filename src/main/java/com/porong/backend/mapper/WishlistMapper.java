@@ -29,34 +29,46 @@ public interface WishlistMapper {
     @Select("""
         SELECT 
             w.id AS wishlistId,
-            w.popup_id,
+            w.popup_id AS popupId,
             p.title,
-            p.main_image_url,
+            p.main_image_url AS mainImageUrl,
             p.address,
             p.status,
-            w.created_at
+            w.created_at AS createdAt,
+            r.region_name AS regionName,
+            c.category_name AS categoryName,
+            p.start_date AS startDate,
+            p.end_date AS endDate
         FROM wishlists w
         INNER JOIN popups p ON w.popup_id = p.id
+        LEFT JOIN regions r ON p.region_id = r.id
+        LEFT JOIN categories c ON p.category_id = c.id
         WHERE w.user_id = #{userId}
         ORDER BY w.created_at DESC
     """)
     List<MyWishlistResponseDto> selectMyWishlist(Long userId);
-   
+    
 
-	 // 특정 팝업스토어의 찜 목록 전체 조회
-	 @Select("""
-	     SELECT 
-	         w.id AS wishlistId,
-	         w.popup_id,
-	         p.title,
-	         p.main_image_url,
-	         p.address,
-	         p.status,
-	         w.created_at
-	     FROM wishlists w
-	     INNER JOIN popups p ON w.popup_id = p.id
-	     WHERE w.popup_id = #{popupId}
-	     ORDER BY w.created_at DESC
-	 """)
-	 List<MyWishlistResponseDto> selectWishlistByPopupId(Long popupId);
+     // 특정 팝업스토어의 찜 목록 전체 조회
+     @Select("""
+         SELECT 
+             w.id AS wishlistId,
+             w.popup_id AS popupId,
+             p.title,
+             p.main_image_url AS mainImageUrl,
+             p.address,
+             p.status,
+             w.created_at AS createdAt,
+             r.region_name AS regionName,
+             c.category_name AS categoryName,
+             p.start_date AS startDate,
+             p.end_date AS endDate
+         FROM wishlists w
+         INNER JOIN popups p ON w.popup_id = p.id
+         LEFT JOIN regions r ON p.region_id = r.id
+         LEFT JOIN categories c ON p.category_id = c.id
+         WHERE w.popup_id = #{popupId}
+         ORDER BY w.created_at DESC
+     """)
+     List<MyWishlistResponseDto> selectWishlistByPopupId(Long popupId);
 }
