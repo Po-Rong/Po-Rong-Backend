@@ -18,4 +18,5 @@ public class ReservationResponseDto {
     private String userName;    // 예약자 이름
     private String userPhone;   // 예약자 전화번호
     private String createdAt;   // 예약 신청 일시
+    private Boolean isReviewed; // true 이면 리뷰 작성 완료
 }

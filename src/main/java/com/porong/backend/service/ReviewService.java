@@ -42,6 +42,15 @@ public class ReviewService {
     // 리뷰 등록 + 누적 횟수별 캐릭터 키링 보상 지급
     @Transactional
     public ResponseEntity<?> createReview(Long popupId, ReviewRequestDto dto, MultipartFile image) {
+    	
+    	// 해당 예약 ID로 이미 작성된 리뷰가 있는지 DB에서 먼저 조회
+        int alreadyExists = reviewMapper.countReviewsByReservationId(dto.getReservationId());
+        
+        if (alreadyExists > 0) {
+            // 이미 존재한다면 후속 인서트 및 키링 지급 로직을 실행하지 않고 400 에러 반환
+            return ResponseEntity.status(400)
+                    .body(Map.of("success", false, "message", "이미 해당 예약에 대한 후기를 작성하셨습니다."));
+        }
 
         // 이미지 파일 처리 (있을 때만)
         String imageUrl = null;
