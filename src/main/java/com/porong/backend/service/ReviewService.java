@@ -46,34 +46,40 @@ public class ReviewService {
         // 이미지 파일 처리 (있을 때만)
         String imageUrl = null;
         if (image != null && !image.isEmpty()) {
-            imageUrl = saveImage(image); // 아래 저장 메서드
+            imageUrl = saveImage(image);
         }
-
-        int currentReviewCount = reviewMapper.countReviewsByUserId(dto.getUserId());
-        int nextReviewCount = currentReviewCount + 1;
 
         ReviewVO review = new ReviewVO();
         review.setContent(dto.getContent());
         review.setRating(dto.getRating());
         review.setCongestionLevel(dto.getCongestionLevel());
-        review.setReviewImageUrl(imageUrl); // DTO 대신 저장된 경로 사용
+        review.setReviewImageUrl(imageUrl);
         review.setPopupId(popupId);
         review.setUserId(dto.getUserId());
         review.setReservationId(dto.getReservationId());
 
+     // 리뷰 인서트 실행
         reviewMapper.insertReview(review);
 
-        Map<String, Object> keyringMap = reviewMapper.findKeyringByReviewCount(nextReviewCount);
+        // 인서트 직후 유저의 누적 리뷰 개수 확인
+        int totalReviewCount = reviewMapper.countReviewsByUserId(dto.getUserId());
 
         Long earnedKeyringId = null;
         String keyringName = "";
-        String responseMessage = nextReviewCount + "번째 리뷰가 성공적으로 등록되었습니다!";
+        String responseMessage = totalReviewCount + "번째 리뷰가 성공적으로 등록되었습니다!";
 
-        if (keyringMap != null) {
-            earnedKeyringId = ((Number) keyringMap.get("id")).longValue();
-            keyringName = (String) keyringMap.get("name");
-            reviewMapper.insertCollectionBook(dto.getUserId(), earnedKeyringId, popupId);
-            responseMessage = nextReviewCount + "번째 리뷰가 등록되었으며, '" + keyringName + "' 키링이 도감에 지급되었습니다!";
+        // 5개 이하일 때만 키링 보상 프로세스 진행
+        if (totalReviewCount <= 5) {
+            Map<String, Object> keyringMap = reviewMapper.findKeyringByReviewCount(totalReviewCount);
+
+            if (keyringMap != null) {
+                earnedKeyringId = ((Number) keyringMap.get("id")).longValue();
+                keyringName = (String) keyringMap.get("name");
+                
+                // 어떤 리뷰(review.getId())로 얻은 키링인지 명시하여 도감에 저장
+                reviewMapper.insertCollectionBook(dto.getUserId(), earnedKeyringId, popupId, review.getId());
+                responseMessage = totalReviewCount + "번째 리뷰가 등록되었으며, '" + keyringName + "' 키링이 도감에 지급되었습니다!";
+            }
         }
 
         ReviewCreateResponseDto response = ReviewCreateResponseDto.builder()
@@ -114,27 +120,30 @@ public class ReviewService {
         return ResponseEntity.ok(Map.of("success", true, "message", "리뷰가 성공적으로 수정되었습니다."));
     }
 
-    // 리뷰 삭제
+ // 리뷰 삭제
     @Transactional
     public ResponseEntity<?> deleteReview(Long reviewId, Long userId) {
         
-        // 기존 리뷰 존재 여부 확인
         ReviewVO existingReview = reviewMapper.findById(reviewId);
         if (existingReview == null) {
             return ResponseEntity.status(404)
                     .body(Map.of("success", false, "message", "존재하지 않는 리뷰입니다."));
         }
 
-        // 권한 검증 본인이 작성한 후기인지 체크 (틀리면 403 Forbidden 리턴)
         if (!existingReview.getUserId().equals(userId)) {
             return ResponseEntity.status(403)
                     .body(Map.of("success", false, "message", "본인이 작성한 후기만 삭제할 수 있습니다."));
         }
 
-        // 도감 테이블에서 이 유저가 이 팝업에서 획득한 키링 데이터 먼저 회수
-        reviewMapper.deleteCollectionBook(userId, existingReview.getPopupId());
+        // 삭제 직전 이 유저의 총 리뷰 개수 확인
+        int currentCount = reviewMapper.countReviewsByUserId(userId);
 
-        // 리뷰 테이블에서 해당 리뷰 삭제 진행
+        // 전체 개수가 5개 이하라면 이 리뷰와 매핑된 도감 키링을 정밀 타겟하여 선제 회수
+        if (currentCount <= 5) {
+            reviewMapper.deleteCollectionBook(userId, reviewId);
+        }
+
+        // 리뷰 삭제는 if 조건과 관계없이 무조건 마지막에 딱 한 번만 깔끔하게 실행
         reviewMapper.deleteReview(reviewId);
 
         return ResponseEntity.ok(Map.of("success", true, "message", "리뷰가 정상적으로 삭제되었습니다."));

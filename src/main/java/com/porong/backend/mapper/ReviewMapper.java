@@ -103,17 +103,22 @@ public interface ReviewMapper {
 
     // 유저 도감(collection_books)에 획득한 키링 추가하기
     @Insert("""
-            INSERT INTO collection_books (user_id, keyring_id, popup_id) 
-            VALUES (#{userId}, #{keyringId}, #{popupId})
+            INSERT INTO collection_books (user_id, keyring_id, popup_id, review_id) 
+            VALUES (#{userId}, #{keyringId}, #{popupId}, #{reviewId})
         """)
-        int insertCollectionBook(@Param("userId") Long userId, @Param("keyringId") Long keyringId, @Param("popupId") Long popupId);
+    int insertCollectionBook(
+        @Param("userId") Long userId, 
+        @Param("keyringId") Long keyringId, 
+        @Param("popupId") Long popupId,
+        @Param("reviewId") Long reviewId
+    );
 
-    // 리뷰 삭제 시 연동된 유저 도감 키링 회수 (삭제)
+    // 키링 삭제하기
     @Delete("""
-    		DELETE FROM collection_books 
-    		WHERE user_id = #{userId} AND popup_id = #{popupId}
-    		""")
-        int deleteCollectionBook(@Param("userId") Long userId, @Param("popupId") Long popupId);
+            DELETE FROM collection_books 
+            WHERE user_id = #{userId} AND review_id = #{reviewId}
+        """)
+    int deleteCollectionBook(@Param("userId") Long userId, @Param("reviewId") Long reviewId);
     
     // 판매자 특정 팝업 리뷰 조회
     @Select("SELECT * FROM reviews WHERE popup_id = #{popupId}")
