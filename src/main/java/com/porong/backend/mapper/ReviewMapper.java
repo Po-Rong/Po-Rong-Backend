@@ -96,6 +96,9 @@ public interface ReviewMapper {
     // 유저가 여태까지 작성한 총 리뷰 개수 구하기
     @Select("SELECT COUNT(*) FROM reviews WHERE user_id = #{userId}")
     int countReviewsByUserId(Long userId);
+    
+    @Select("SELECT COUNT(*) FROM reviews WHERE reservation_id = #{reservationId}")
+    int countReviewsByReservationId(Long reservationId);
 
     // 리뷰 개수 조건(1~5)에 딱 맞는 캐릭터 키링 ID 및 이름 조회하기
     @Select("SELECT id, name FROM keyrings WHERE review_count = #{reviewCount} LIMIT 1")
