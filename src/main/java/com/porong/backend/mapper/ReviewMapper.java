@@ -33,7 +33,8 @@ public interface ReviewMapper {
 	            r.content,
 	            r.review_image_url,
 	            r.rating,
-	            r.reservation_id AS reservationId -- 📍 [추가] DB의 예약 ID를 응답 필드와 매핑
+	            r.reservation_id AS reservationId,
+	            r.created_at AS createdAt
 	        FROM reviews r
 	        INNER JOIN users u ON r.user_id = u.id
 	        INNER JOIN reservations res ON r.reservation_id = res.id 
