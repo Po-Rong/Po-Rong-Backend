@@ -18,4 +18,5 @@ public class ReviewListResponseDto {
     private String reviewImageUrl;  // r.review_image_url
     private Integer rating;
     private Long reservationId;		// 예약 Id
+    private String createdAt;
 }
