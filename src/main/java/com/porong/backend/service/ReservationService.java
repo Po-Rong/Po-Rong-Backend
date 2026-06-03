@@ -1,5 +1,6 @@
 package com.porong.backend.service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -74,33 +75,45 @@ public class ReservationService {
     }
     
     // 5. 판매자용 - 팝업 예약자 목록 조회
-    public ResponseEntity<?> getReservationsByPopup(Long popupId, Long sellerId, int page, int size) {
-        String role = reservationMapper.findRoleById(sellerId);
-        if (role == null || !role.equals("seller")) {
-            return ResponseEntity.status(403)
-                .body(Map.of("message", "판매자만 조회할 수 있습니다."));
-        }
-
-        int offset = page * size;
-        List<String> dates = reservationMapper.findDistinctDatesBySellerId(sellerId, size, offset);
-        int totalDates = reservationMapper.countDistinctDatesBySellerId(sellerId);
-        boolean hasNext = (offset + size) < totalDates;
-
-        List<Map<String, Object>> result = new ArrayList<>();
-        for (String date : dates) {
-            List<ReservationResponseDto> reservations = reservationMapper.findBySellerIdAndDate(sellerId, date);
-            Map<String, Object> group = new LinkedHashMap<>();
-            group.put("date", date);
-            group.put("reservations", reservations);
-            result.add(group);
-        }
-
-        return ResponseEntity.ok(Map.of(
-            "content", result,
-            "currentPage", page,
-            "hasNext", hasNext
-        ));
-    }
+    public ResponseEntity<?> getReservationsByPopup(Long popupId, Long sellerId,
+													Integer year, Integer month,
+													int page, int size) {
+		String role = reservationMapper.findRoleById(sellerId);
+		if (role == null || !role.equals("seller")) {
+		return ResponseEntity.status(403)
+		.body(Map.of("message", "판매자만 조회할 수 있습니다."));
+		}
+		
+		// year/month 기본값: 현재 날짜
+		LocalDate now = LocalDate.now();
+		int targetYear = (year != null) ? year : now.getYear();
+		int targetMonth = (month != null) ? month : now.getMonthValue();
+		
+		int offset = page * size;
+		List<String> dates = reservationMapper.findDistinctDatesBySellerId(
+		sellerId, targetYear, targetMonth, size, offset);
+		int totalDates = reservationMapper.countDistinctDatesBySellerId(
+		sellerId, targetYear, targetMonth);
+		boolean hasNext = (offset + size) < totalDates;
+		
+		List<Map<String, Object>> result = new ArrayList<>();
+		for (String date : dates) {
+		List<ReservationResponseDto> reservations =
+		reservationMapper.findBySellerIdAndDate(sellerId, date);
+		Map<String, Object> group = new LinkedHashMap<>();
+		group.put("date", date);
+		group.put("reservations", reservations);
+		result.add(group);
+		}
+		
+		return ResponseEntity.ok(Map.of(
+		"content", result,
+		"currentPage", page,
+		"hasNext", hasNext,
+		"year", targetYear,
+		"month", targetMonth
+		));
+	}
     
     // 6. 판매자용 - 팝업 예약자 예약 취소
     public ResponseEntity<?> cancelReservationBySeller(Long reservationId, Long sellerId) {

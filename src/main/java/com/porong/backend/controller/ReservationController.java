@@ -101,12 +101,14 @@ public class ReservationController {
     // 5. 판매자용 - 팝업 예약자 목록 조회
     @GetMapping
     public ResponseEntity<?> getReservationsByPopup(
-        @RequestParam(value = "popup_id", required = false) Long popupId,
-        @RequestParam("seller_id") Long sellerId,
-        @RequestParam(value = "page", defaultValue = "0") int page,
-        @RequestParam(value = "size", defaultValue = "2") int size) {
-        return reservationService.getReservationsByPopup(popupId, sellerId, page, size);
-    }
+    	    @RequestParam(value = "popup_id", required = false) Long popupId,
+    	    @RequestParam("seller_id") Long sellerId,
+    	    @RequestParam(value = "year", required = false) Integer year,
+    	    @RequestParam(value = "month", required = false) Integer month,
+    	    @RequestParam(value = "page", defaultValue = "0") int page,
+    	    @RequestParam(value = "size", defaultValue = "5") int size) {  // size 5로 올려도 좋아요
+    	    return reservationService.getReservationsByPopup(popupId, sellerId, year, month, page, size);
+    	}
     
     // 6. 판매자용 - 팝업 예약자 예약 취소
     @PatchMapping("/{reservationId}/seller-cancel")

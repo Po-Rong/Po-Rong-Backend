@@ -25,5 +25,5 @@ public class AdminReviewResponseDto {
     private String categoryName;
     private String popupStatus;   // 팝업 운영 상태
     private String regionName;    // 지역명
-
+    private String reserveDate;
 }
