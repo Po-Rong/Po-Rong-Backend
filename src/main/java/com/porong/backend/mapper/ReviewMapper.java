@@ -136,13 +136,16 @@ public interface ReviewMapper {
             "  WHEN NOW() > p.end_date THEN 'closed' " +
             "  ELSE 'ongoing' " +
             "END as popupStatus, " +
-            "c.category_name as categoryName, rg.region_name as regionName " +
+            "c.category_name as categoryName, rg.region_name as regionName, " +
+            "res.reserve_date as reserveDate " +
             "FROM reviews r " +
             "JOIN popups p ON r.popup_id = p.id " +
             "JOIN users u ON r.user_id = u.id " +
             "JOIN categories c ON p.category_id = c.id " +
             "JOIN regions rg ON p.region_id = rg.id " +
-            "WHERE p.user_id = #{sellerId}")
+            "LEFT JOIN reservations res ON r.reservation_id = res.id " +
+            "WHERE p.user_id = #{sellerId} " +
+            "ORDER BY r.created_at DESC")
     List<AdminReviewResponseDto> findAllBySellerId(Long sellerId);
     
     @Select("""
