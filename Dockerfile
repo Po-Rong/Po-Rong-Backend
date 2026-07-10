@@ -1,10 +1,13 @@
-# 1. 빌드 스테이지: Gradle 공식 이미지 사용
-FROM gradle:7.6-jdk17 AS build
+# 1. 빌드 스테이지: 요구 조건에 맞게 Gradle 8.14 버전으로 대폭 업그레이드
+FROM gradle:8.14-jdk17 AS build
 COPY --chown=gradle:gradle . /home/gradle/src
 WORKDIR /home/gradle/src
-RUN gradle build -x test --no-daemon
 
-# 2. 실행 스테이지: openjdk 대신 널리 쓰이는 eclipse-temurin 이미지로 교체
+# 내 프로젝트의 gradlew 권한을 주고 빌드 진행
+RUN chmod +x ./gradlew
+RUN ./gradlew build -x test --no-daemon
+
+# 2. 실행 스테이지
 FROM eclipse-temurin:17-jre-jammy
 EXPOSE 8080
 RUN mkdir /app
