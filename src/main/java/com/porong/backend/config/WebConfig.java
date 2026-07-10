@@ -11,7 +11,11 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/uploads/**")
-                .addResourceLocations("file:" + System.getProperty("user.dir") + "/uploads/");
+                .addResourceLocations(
+                    "file:" + System.getProperty("user.dir") + "/uploads/",
+                    // upload 사진을 위한 클래스패스 경로
+                    "classpath:/static/uploads/"
+                );
     }
     
     @Override
